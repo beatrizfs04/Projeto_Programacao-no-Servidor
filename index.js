@@ -14,5 +14,5 @@ app.use(express.json());
 app.use('/', SQL);
 
 app.listen(port, () => {
-    console.log(`Web Page Title: ${pageName} | On: http://localhost:${port}`);
+    console.log(`Web Page Title: ${pageTitle} | On: http://localhost:${port}`);
 });
