@@ -1,25 +1,18 @@
+/* Requirements */
 const express = require('express');
 const app = express();
 const port = 3000;
-const pageTitle = "Projeto Final - Programação no Servidor"
-const fs = require('fs');
+const pageTitle = "Projeto Final - Programação no Servidor";
 
-function loadFile(fileDict) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(fileDict, 'utf8', (err, contents) => {
-            if (err != null) { reject(err); return; }
-            console.log("> File Readed Successfully.");
-            resolve(JSON.parse(contents));
-        });
-    });
-}
+/* Imports */
+const SQL = required('./Controllers/sql');
+const Files = required('./Controllers/files');
 
-function saveFile(fileDict, data) {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(fileDict, JSON.stringify(data), (err) => {
-            if (err != null) { reject(err); return; }
-            console.log("> Successfully Written to File.")
-            resolve(JSON.parse(JSON.stringify(data)));
-        });
-    });
-}
+/* Initialize */
+
+app.use(express.json());
+app.use('/', SQL);
+
+app.listen(port, () => {
+    console.log(`Web Page Title: ${pageName} | On: http://localhost:${port}`);
+});
