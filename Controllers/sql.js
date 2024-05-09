@@ -1,6 +1,5 @@
 /* Requirements */
 const express = require('express');
-const SQLExport = express.Router();
 
 /* SQL Connection */
 const mongoose = require('mongoose');
@@ -34,9 +33,4 @@ const SQL = mongoose.model(dbName, schemaDB);
     > await SQL.deleteMany({}); - Apagar Todos os Objetos da Base de Dados
 */
 
-SQLExport.get('/', async (req, res) => {
-    const gotData = await SQL.find({});
-    console.log(gotData);
-});
-
-module.exports = SQLExport;
+module.exports = SQL;
