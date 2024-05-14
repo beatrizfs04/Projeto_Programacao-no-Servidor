@@ -385,6 +385,61 @@ paths:
       responses:
         '400':
           description: Número Id do Drone inválido
+  /estatisticas/modelos:
+    get:
+      tags:
+        - estatisticas
+      summary: Consultar estatísticas dos modelos de drone mais montados
+      description: Retorna uma lista dos 10 modelos de drone mais montados. O parâmetro 'limit' permite mudar o limite de resultados retornados.
+      operationId: getTopModelsStatistics
+      parameters:
+        - name: limit
+          in: query
+          description: Número máximo de resultados a retornar
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstatisticaModelo'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/EstatisticaModelo'
+        '400':
+          description: Parâmetro inválido
+  /estatisticas/pecas:
+    get:
+      tags:
+        - estatisticas
+      summary: Consultar estatísticas das peças mais usadas
+      description: Retorna uma lista das peças mais usadas em montagens de drones. O parâmetro 'limit' permite mudar o limite de resultados retornados.
+      operationId: getTopPartsStatistics
+      parameters:
+        - name: limit
+          in: query
+          description: Número máximo de resultados a retornar
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstatisticaPeca'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/EstatisticaPeca'
+        '400':
+          description: Parâmetro inválido
+
 components:
   schemas:
     Drone:
@@ -449,6 +504,30 @@ components:
           example: '12345'
       xml:
         name: user
-servers:
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/ManuPadilha/Drone/1.0.0
+    EstatisticaModelo:
+      type: array
+      items:
+        type: object
+        properties:
+          modelo:
+            type: string
+            description: Nome do modelo de drone.
+            example: DJI Mini 4 Pro
+          quantidade:
+            type: integer
+            description: Quantidade de vezes que o modelo foi montado.
+            example: 25
+    EstatisticaPeca:
+      type: array
+      items:
+        type: object
+        properties:
+          peca:
+            type: string
+            description: Nome da peça.
+            example: motores
+          quantidade:
+            type: integer
+            description: Quantidade de vezes que a peça foi usada em montagens de drones.
+            example: 50
+    
