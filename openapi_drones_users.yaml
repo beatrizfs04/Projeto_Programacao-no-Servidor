@@ -1,0 +1,311 @@
+openapi: 3.0.3
+info:
+  title: Projeto de Gestão de Montagem de Drones
+  description: >-
+    Desenvolver uma aplicação web para gerir o processo de montagem de drones. A
+    aplicação deve permitir aos utilizadores registar-se, autenticar-se e criar,
+    visualizar, atualizar e eliminar informações relacionadas com a montagem de
+    drones. Os endpoints da API devem ser implementados de acordo com as
+    melhores práticas RESTful. Os endpoints deverão ser documentados em OpenAPI.
+  version: 1.0.0
+tags:
+  - name: drone
+    description: Tudo sobre os seus drones
+  - name: user
+    description: Operações dos utilizadores
+paths:
+  /user:
+    post:
+      tags:
+        - user
+      summary: Cria um utilizador
+      description: Isto só consegue ser feito pelo sign up.
+      operationId: createUser
+      requestBody:
+        description: Criado utilizador.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/{userId}:
+    get:
+      tags:
+        - user
+      summary: Encontrar utilizador pelo seu Id
+      description: ''
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: O Id que precisa de ser encontrado.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalido Id fornecido
+        '404':
+          description: Utilizador não encontrado
+    patch:
+      tags:
+        - user
+      summary: Atualizar utilizador
+      description: Isto só pode ser feito por um utilizador logado.
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          description: Id que precisa de ser alterado
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Atualizar utilizador existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: operação bem sucedida
+    delete:
+      tags:
+        - user
+      summary: Apagar utilizador
+      description: Isto só pode ser feito por um utilizador logado.
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: O Id que precisa de ser apagado
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalido Id fornecido
+        '404':
+          description: Utilizador não encontrado
+  /drone:
+    post:
+      tags:
+        - drone
+      summary: Adicionar um novo drone
+      description: Adicionar um novo drone
+      operationId: addDrone
+      requestBody:
+        description: Criar um novo drone
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Drone'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Drone'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Drone'
+        required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drone'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Drone'
+        '400':
+          description: Entrada inválida
+        '422':
+          description: Exceção de validação
+    get:
+      tags:
+        - drone
+      summary: Consultar todos os drones
+      description: Consulta todos os drones disponíveis atualmente.
+      operationId: findAllDrones
+      responses:
+        '200':
+          description: Operação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drone'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Drone'
+        '400':
+          description: Erro ao processar a solicitação
+  /drone/{droneId}:
+    get:
+      tags:
+        - drone
+      summary: Encontra o Drone por ID
+      description: Inserir o ID para encontrar um o Drone
+      operationId: getDroneById
+      parameters:
+        - name: droneId
+          in: path
+          description: ID do drone
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drone'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Drone'
+        '400':
+          description: ID inválido fornecido
+        '404':
+          description: Drone não encontrado
+    patch:
+      tags:
+        - drone
+      summary: Atualizar um drone por ID
+      description: Atualizar um drone existente por ID
+      operationId: updateDrone
+      parameters:
+        - name: droneId
+          in: path
+          description: ID do drone que precisa ser alterado
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Atualizar um drone existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Drone'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Drone'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Drone'
+        required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drone'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Drone'
+        '400':
+          description: ID inválido fornecido
+        '404':
+          description: Drone não encontrado
+        '422':
+          description: Exceção de validação
+    delete:
+      tags:
+        - drone
+      summary: Eliminar um drone por ID
+      description: Elimina um drone
+      operationId: deleteDrone
+      parameters:
+        - name: droneId
+          in: path
+          description: ID do drone a ser eliminado
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Número Id do Drone inválido
+components:
+  schemas:
+    Drone:
+      type: object
+      required:
+        - id
+        - droneModelo
+        - dataMontagem
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: ID único da montagem do drone
+        droneModelo:
+          type: string
+          example: DJI Mini 4 Pro
+        dataMontagem:
+          type: string
+          format: date
+          description: Data de montagem do drone
+    User:
+      type: object
+      required: 
+        - userId
+        - userName
+        - email
+        - password
+        - phone
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 10
+        userName:
+          type: string
+          example: John Rivers
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: '12345'
+        phone:
+          type: string
+          example: '12345'
+      xml:
+        name: user
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ManuPadilha/Drone/1.0.0
