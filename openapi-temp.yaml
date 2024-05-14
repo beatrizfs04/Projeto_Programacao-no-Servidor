@@ -11,6 +11,8 @@ info:
 tags:
   - name: drone
     description: Tudo sobre os seus drones
+  - name: pecas
+    description: Tudo sobre as peças dos drones
   - name: user
     description: Operações dos utilizadores
 paths:
@@ -117,6 +119,131 @@ paths:
           description: Invalido Id fornecido
         '404':
           description: Utilizador não encontrado
+  /pecas:
+    post:
+      tags:
+        - pecas
+      summary: Criar uma nova lista de peças
+      description: Criar uma nova lista de peças para um drone de ID específico.
+      operationId: createPecas
+      requestBody:
+        description: Lista de Peças Criada.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pecas'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Pecas'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Pecas'
+        required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pecas'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Pecas'
+        '400':
+          description: ID inválido fornecido
+        '404':
+          description: Drone não encontrado
+        '422':
+          description: Exceção de validação
+  /pecas/{droneId}:
+    get:
+      tags:
+        - pecas
+      summary: Encontra as peças pelo ID do Drone
+      description: Inserir o ID para encontrar as peças de um Drone
+      operationId: getPecasbyId
+      parameters:
+        - name: droneId
+          in: path
+          description: ID do drone
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pecas'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Pecas'
+        '400':
+          description: ID inválido fornecido
+        '404':
+          description: Drone não encontrado
+    patch:
+      tags:
+        - pecas
+      summary: Atualizar as peças de um drone pelo ID
+      description: Atualizar as peças de um drone existente pelo ID
+      operationId: updatePecas
+      parameters:
+        - name: droneId
+          in: path
+          description: ID do drone que precisa ser alterado
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Atualizar um drone existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pecas'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Pecas'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Pecas'
+        required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pecas'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Pecas'
+        '400':
+          description: ID inválido fornecido
+        '404':
+          description: Drone não encontrado
+        '422':
+          description: Exceção de validação
+    delete:
+      tags:
+        - pecas
+      summary: Eliminar as peças de um drone pelo ID
+      description: Elimina as peças de um drone pelo seu ID
+      operationId: deletePecas
+      parameters:
+        - name: droneId
+          in: path
+          description: ID do drone a ser eliminado
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Número de ID do Drone inválido
   /drone:
     post:
       tags:
@@ -174,7 +301,7 @@ paths:
       tags:
         - drone
       summary: Encontra o Drone por ID
-      description: Inserir o ID para encontrar um o Drone
+      description: Inserir o ID para encontrar o Drone
       operationId: getDroneById
       parameters:
         - name: droneId
@@ -279,9 +406,25 @@ components:
           type: string
           format: date
           description: Data de montagem do drone
+    Pecas:
+      type: object
+      required:
+        - droneId
+        - pecas
+      properties:
+        droneId:
+          type: integer
+          format: int64
+          example: 1
+          description: ID único do drone
+        pecas:
+          type: array
+          items: 
+            example: ["motores", "hélices", "baterias"]
+            type: string
     User:
       type: object
-      required: 
+      required:
         - userId
         - userName
         - email
