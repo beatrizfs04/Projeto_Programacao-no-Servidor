@@ -5,8 +5,11 @@ const port = 3000;
 const pageTitle = "Projeto Final - Programação no Servidor";
 
 /* Imports */
-const Routes = required('./Controllers/routes');
-const Files = required('./Controllers/files');
+const Routes = require('./Controllers/routes');
+const Files = require('./Controllers/files');
+const Users = require('./Controllers/users');
+
+Users.checkUsers()
 
 /* Initialize */
 
