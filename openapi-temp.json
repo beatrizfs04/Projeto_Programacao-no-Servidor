@@ -3,9 +3,13 @@
   "info": {
     "title": "Projeto de Gestão de Montagem de Drones",
     "description": "Desenvolver uma aplicação web para gerir o processo de montagem de drones. A aplicação deve permitir aos utilizadores registar-se, autenticar-se e criar, visualizar, atualizar e eliminar informações relacionadas com a montagem de drones. Os endpoints da API devem ser implementados de acordo com as melhores práticas RESTful. Os endpoints deverão ser documentados em OpenAPI.",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "tags": [
+    {
+      "name": "auth",
+      "description": "Autenticação dos utilizadores"
+    },
     {
       "name": "drone",
       "description": "Tudo sobre os seus drones"
@@ -63,6 +67,43 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Cria uma sessão autenticada",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "description": "The user to create.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "userName"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token do utilizador autenticado"
+          },
+          "404": {
+            "description": "Utilizador ou senha invalidos"
           }
         }
       }
@@ -173,6 +214,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Utilizador eliminado com sucesso"
+          },
           "400": {
             "description": "Invalido Id fornecido"
           },
@@ -370,6 +414,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Peças do drone com ID eliminado com sucesso"
+          },
           "400": {
             "description": "Número de ID do Drone inválido"
           }
@@ -589,6 +636,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Drone com ID eliminado com sucesso"
+          },
           "400": {
             "description": "Número Id do Drone inválido"
           }

@@ -7,8 +7,10 @@ info:
     visualizar, atualizar e eliminar informações relacionadas com a montagem de
     drones. Os endpoints da API devem ser implementados de acordo com as
     melhores práticas RESTful. Os endpoints deverão ser documentados em OpenAPI.
-  version: 1.0.0
+  version: 1.0.1
 tags:
+  - name: auth
+    description: Autenticação dos utilizadores
   - name: drone
     description: Tudo sobre os seus drones
   - name: pecas
@@ -16,6 +18,8 @@ tags:
   - name: user
     description: Operações dos utilizadores
 paths:
+  
+      
   /user:
     post:
       tags:
@@ -45,6 +49,32 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/User'
+                
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Cria uma sessão autenticada
+      parameters:
+        - in: query
+          name: user
+          description: The user to create.
+          schema:
+            type: object
+            required:
+              - userName
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: Token do utilizador autenticado
+        '404':
+          description: Utilizador ou senha invalidos
+
+            
   /user/{userId}:
     get:
       tags:
@@ -119,6 +149,8 @@ paths:
           description: Invalido Id fornecido
         '404':
           description: Utilizador não encontrado
+        '200':
+          description: Utilizador eliminado com sucesso
   /pecas:
     post:
       tags:
@@ -244,6 +276,8 @@ paths:
       responses:
         '400':
           description: Número de ID do Drone inválido
+        '200':
+          description: Peças do drone com ID eliminado com sucesso
   /drone:
     post:
       tags:
@@ -385,6 +419,8 @@ paths:
       responses:
         '400':
           description: Número Id do Drone inválido
+        '200':
+          description: Drone com ID eliminado com sucesso
   /estatisticas/modelos:
     get:
       tags:
