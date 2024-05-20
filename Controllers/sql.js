@@ -19,7 +19,7 @@ var schemaDB = new Schema({
 }, { collection: dbName });
 
 SQL.useSchema = function(schema) {
-    mongoose.model(dbName, schema);
+    return mongoose.model(dbName, schema);
 } 
 
 SQL.createSchema = function(schema) {
