@@ -2,6 +2,10 @@ const express = require('express');
 const users = express.Router();
 const SQL = require('../Controllers/sql');
 
+/* const UsersSchema = SQL.createSchema({
+    username: String,
+}) */
+
 users.checkUsers = async function(){
     const fetchedUsers = await SQL.find({});
     return fetchedUsers;

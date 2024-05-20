@@ -20,6 +20,10 @@ var schemaDB = new Schema({
 
 const SQL = mongoose.model(dbName, schemaDB); 
 
+SQL.createSchema = function(schema) {
+    return new Schema(schema, { collection: dbName });
+}
+
 /*
     SQL Available Commands:
     > await SQL.find({}) - Procurar Por Toda a Informação Sem Variáveis Específicas
