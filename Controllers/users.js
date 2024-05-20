@@ -4,7 +4,7 @@ const SQL = require('../Controllers/sql');
 
 /* const UsersSchema = SQL.createSchema({
     username: String,
-}) 
+})
 
 const UsersDB = SQL.useSchema(UsersSchema);*/
 
