@@ -18,7 +18,9 @@ var schemaDB = new Schema({
     /* variable: value */
 }, { collection: dbName });
 
-const SQL = mongoose.model(dbName, schemaDB); 
+SQL.useSchema = function(schema) {
+    mongoose.model(dbName, schema);
+} 
 
 SQL.createSchema = function(schema) {
     return new Schema(schema, { collection: dbName });
