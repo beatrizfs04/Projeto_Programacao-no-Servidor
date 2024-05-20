@@ -35,7 +35,7 @@ routes.patch('/users', async (req, res) => {
     const oldUser = Users.checkUser(oldUsername);
     const updateUser = Users.updateUser(oldUser, newUser);
     res.status(200).send(updateUser);
-    res.status(400).send(`Não foi possivel atualizar o utilizador com o username: ${username}.`);
+    res.status(400).send(`Não foi possivel atualizar o utilizador com o username: ${username}, para o novo user: ${newUser}.`);
 })
 
 // Apagar um utilizador através do username

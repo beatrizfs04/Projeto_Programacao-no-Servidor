@@ -14,16 +14,12 @@ db.on('error', console.error.bind(console, '> Can\'t Connected Because of an Err
 db.once('open', function callback() { console.log('> Connected Sucessfully to MongoDB.'); });
 
 /* Schema & Data */
-var schemaDB = new Schema({
-    /* variable: value */
-}, { collection: dbName });
-
 SQL.useSchema = function(schema) {
     return mongoose.model(dbName, schema);
 } 
 
 SQL.createSchema = function(schema) {
-    return new Schema(schema, { collection: dbName });
+    return new Schema(schema, {collection: dbName});
 }
 
 /*
