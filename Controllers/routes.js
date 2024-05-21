@@ -16,10 +16,12 @@ routes.get('/users', async (req, res) => {
 })
 
 // Ver um utilizador através do username
-routes.get('/users', async (req, res) => {
-    const username = req.body;
+routes.get('/users/:username', async (req, res) => {
+    const {username} = req.params;
     try {
         const gotUser = await Users.checkUser(username);
+        console.log(username)
+        console.log(gotUser)
         res.status(200).send(gotUser);
     } catch {
         res.status(400).send(`Não foi possivel encontrar o utilizador com o username: ${username}.`);
