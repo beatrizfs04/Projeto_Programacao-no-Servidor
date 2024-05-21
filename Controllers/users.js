@@ -1,6 +1,7 @@
 const express = require('express');
 const users = express.Router();
 const SQL = require('../Controllers/sql');
+const validator = require('validator');
 
 //Schema_Users
 const UsersSchema = SQL.createSchema({
