@@ -53,4 +53,19 @@ routes.delete('/users', async (req, res) => {
     res.status(400).send(`Não foi possivel apagar os utilizadores.`);
 })
 
+// Login de Utilizadores
+routes.post('/login', async (req, res) => {
+    const {username , password} = req.body;
+    try {
+        const gotUser = Users.checkUser(username);
+        if (gotUser.password == password) {
+            res.status(200).send(gotUser);
+        } else {
+            res.status(400).send("Incorrect Password.");
+        }
+    } catch {
+        res.status(404).send("Username Not Found.");
+    }
+})
+
 module.exports = routes;
