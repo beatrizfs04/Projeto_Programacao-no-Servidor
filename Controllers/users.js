@@ -31,7 +31,7 @@ const UsersSchema = SQL.createSchema({
         type: Number,
         required: true,
         minlength: [9, 'Tamanho minimo é 9.'],
-        maxlength: [12, 'Tamanho máximo é 12.'],
+        maxlength: [12, 'Tamanho máximo é 9.'],
     },
 })
 
