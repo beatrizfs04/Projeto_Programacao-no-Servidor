@@ -79,15 +79,21 @@ routes.delete('/users', async (req, res) => {
 // Login de Utilizadores
 routes.post('/login', async (req, res) => {
     const {username , password} = req.body;
+    var gotUser;
     try {
-        const gotUser = Users.checkUser(username);
+        gotUser = await Users.checkUser(username);
+    } catch {
+        res.status(400).send("Error! Something went wrong.");
+    }
+
+    if (gotUser) {
         if (gotUser.password == password) {
             res.status(200).send(gotUser);
         } else {
             res.status(400).send("Incorrect Password.");
         }
-    } catch {
-        res.status(404).send("Username Not Found.");
+    } else {
+        res.status(404).send("Username not Found.");
     }
 })
 
