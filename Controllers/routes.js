@@ -51,6 +51,7 @@ routes.patch('/users', async (req, res) => {
         const newUser = { username: newUsername, email: newEmail, password: newPassword, phone: newPhone };
         const oldUser = Users.checkUser(oldUsername);
         const updateUser = Users.updateUser(oldUser, newUser);
+
         res.status(200).send(updateUser);
     } catch {
         res.status(400).send(`Não foi possivel atualizar o utilizador com o username: ${username}, para o novo user: ${newUser}.`);
@@ -58,10 +59,16 @@ routes.patch('/users', async (req, res) => {
 })
 
 // Apagar um utilizador através do username
-routes.delete('/users', async (req, res) => {
-    const username = req.body;
+routes.delete('/users/:username', async (req, res) => {
+    const { username } = req.params;
     try {
-        const deletedUser = Users.deleteUser(username);
+        const deletedUser = await Users.deleteUser(username);
+
+        console.log(deletedUser)
+        if (deletedUser == null)
+            return res.status(404).end()
+
+
         res.status(200).send(deletedUser);
     } catch {
         res.status(400).send(`Não foi possivel apagar o utulizador com o username: ${username}.`);
@@ -73,8 +80,8 @@ routes.delete('/users', async (req, res) => {
     try {
         const deletedUsers = Users.deleteUsers();
         res.status(200).send(deletedUsers);
-    } catch {
-        res.status(400).send(`Não foi possivel apagar os utilizadores.`);
+    } catch(err) {
+        res.status(400).send(`Não foi possivel apagar os utilizadores. ${err.message}`);
     }
 })
 
