@@ -16,8 +16,8 @@ routes.get('/users', async (req, res) => {
 
 // Ver um utilizador através do username
 routes.get('/users', async (req, res) => {
+    const username = req.body;
     try {
-        const username = req.body;
         const gotUser = Users.checkUser(username);
         res.status(200).send(gotUser);
     } catch {
@@ -27,20 +27,25 @@ routes.get('/users', async (req, res) => {
 
 // Criar um utilizador
 routes.post('/users', async (req, res) => {
+    const {username, email, password, phone} = req.body;
     try {
-        const {username, email, password, phone} = req.body;
-        const newUser = {username: username, email: email, password: password, phone: phone};
-        const createdUser = Users.createUser(newUser);
-        res.status(200).send(createdUser);
+        const existUser = Users.checkUser(username);
+        res.status(400).send(`Já existe um utilizador com o username: ${username}`);
     } catch {
-        res.status(400).send(`Não foi possivel acrescentar o utilizador com o username: ${username}, o email: ${email}, a password: ${password}, o phone: ${phone}.`);
+        try {
+            const newUser = {username: username, email: email, password: password, phone: phone};
+            const createdUser = Users.createUser(newUser);
+            res.status(200).send(createdUser);
+        } catch {
+            res.status(400).send(`Não foi possivel acrescentar o utilizador com o username: ${username}, o email: ${email}, a password: ${password}, o phone: ${phone}.`);
+        }
     }
 })
 
 // Atualizar os dados de um utilizador
 routes.patch('/users', async (req, res) => {
+    const {oldUsername, newUsername, newEmail, newPassword, newPhone} = req.body;
     try {
-        const {oldUsername, newUsername, newEmail, newPassword, newPhone} = req.body;
         const newUser = {username: newUsername, email: newEmail, password: newPassword, phone: newPhone}; 
         const oldUser = Users.checkUser(oldUsername);
         const updateUser = Users.updateUser(oldUser, newUser);
@@ -52,8 +57,8 @@ routes.patch('/users', async (req, res) => {
 
 // Apagar um utilizador através do username
 routes.delete('/users', async (req, res) => {
+    const username = req.body;
     try {
-        const username = req.body;
         const deletedUser = Users.deleteUser(username);
         res.status(200).send(deletedUser);
     } catch {
