@@ -13,6 +13,8 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, '> Can\'t Connected Because of an Error.'));
 db.once('open', function callback() { console.log('> Connected Sucessfully to MongoDB.'); });
 
+const SQL = {};
+
 /* Schema & Data */
 SQL.useSchema = function(schema) {
     return mongoose.model(dbName, schema);
