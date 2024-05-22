@@ -18,8 +18,8 @@ SQL.useSchema = function(schema) {
     return mongoose.model(dbName, schema);
 } 
 
-SQL.createSchema = function(schema) {
-    return new Schema(schema, {collection: dbName});
+SQL.createSchema = function(schema, collection) {
+    return new Schema(schema, {collection: collection});
 }
 
 /*

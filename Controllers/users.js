@@ -33,7 +33,7 @@ const UsersSchema = SQL.createSchema({
         minlength: [9, 'Tamanho minimo é 9.'],
         maxlength: [9, 'Tamanho máximo é 9.'],
     },
-})
+}, "users")
 
 const UsersDB = SQL.useSchema(UsersSchema);
 
