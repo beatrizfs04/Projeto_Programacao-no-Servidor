@@ -1,5 +1,6 @@
 /* Requirements */
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const app = express();
 const port = 3000;
 const pageTitle = "Projeto Final - Programação no Servidor";
@@ -12,7 +13,7 @@ const Users = require('./Controllers/users');
 Users.checkUsers()
 
 /* Initialize */
-
+app.use(cookieParser());
 app.use(express.json());
 app.use('/', Routes);
 
