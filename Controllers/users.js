@@ -30,11 +30,11 @@ const UsersSchema = SQL.createSchema({
         type: Number,
         required: true,
         minlength: [9, 'Tamanho minimo é 9.'],
-        maxlength: [12, 'Tamanho máximo é 9.'],
+        maxlength: [9, 'Tamanho máximo é 9.'],
     },
 }, "users")
 
-const UsersDB = SQL.useSchema(UsersSchema);
+const UsersDB = SQL.useSchema(UsersSchema, "users");
 
 
 // Procura todos os utilizadores na BD

@@ -4,7 +4,6 @@ const express = require('express');
 /* SQL Connection */
 const mongoose = require('mongoose');
 const url = "mongodb+srv://rodrigo:paiva001@node-ubi.wadwlsk.mongodb.net/projetops";
-const dbName = "progservidor";
 const { Schema } = mongoose;
 
 /* Do Connection */
@@ -16,7 +15,7 @@ db.once('open', function callback() { console.log('> Connected Sucessfully to Mo
 const SQL = {};
 
 /* Schema & Data */
-SQL.useSchema = function(schema) {
+SQL.useSchema = function(schema, dbName) {
     return mongoose.model(dbName, schema);
 } 
 
