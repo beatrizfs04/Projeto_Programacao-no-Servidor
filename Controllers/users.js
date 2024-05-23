@@ -25,7 +25,6 @@ const UsersSchema = SQL.createSchema({
         type: String,
         required: true,
         minlength: [8, 'Tamanho minimo é 8.'],
-        maxlength: [24, 'Tamanho máximo é 24.'],
     },
     phone: {
         type: Number,
