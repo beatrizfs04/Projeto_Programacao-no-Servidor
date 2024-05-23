@@ -3,6 +3,7 @@ const express = require('express');
 const routes = express.Router();
 const jwt = require("jsonwebtoken");
 const SQL = require('../Controllers/sql');
+const bcrypt = require('bcrypt');
 const Users = require('../Controllers/users');
 
 // Ver todos os utilizadores
@@ -36,8 +37,9 @@ routes.post('/users', async (req, res) => {
 
         if (existUser.length > 0)
             return res.status(400).send(`Já existe um utilizador com o username: ${username}`);
-
-        const newUser = { username: username, email: email, password: password, phone: phone };
+        
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = { username: username, email: email, password: hashedPassword, phone: phone };
         const createdUser = await Users.createUser(newUser);
         return res.status(200).send(createdUser);
 
@@ -50,7 +52,8 @@ routes.post('/users', async (req, res) => {
 routes.patch('/users', async (req, res) => {
     const { oldUsername, newUsername, newEmail, newPassword, newPhone } = req.body;
     try {
-        const newUser = { username: newUsername, email: newEmail, password: newPassword, phone: newPhone };
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const newUser = { username: newUsername, email: newEmail, password: hashedPassword, phone: newPhone };
         const oldUser = Users.checkUser(oldUsername);
         const updateUser = Users.updateUser(oldUser, newUser);
 
@@ -100,7 +103,8 @@ routes.post('/login', async (req, res) => {
     if (gotUser) {
         gotUser = gotUser[0]
 
-        if (gotUser.password == password) {
+        const passwordMatch = await bcrypt.compare(password, gotUser.password);
+        if (passwordMatch) {
             let token
             try {
                 token = jwt.sign(
