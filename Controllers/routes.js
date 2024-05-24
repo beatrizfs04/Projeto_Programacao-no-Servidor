@@ -6,6 +6,11 @@ const SQL = require('../Controllers/sql');
 const bcrypt = require('bcrypt');
 const Users = require('../Controllers/users');
 
+/* Import das Funções */
+const Montagens = require('../Controllers/montagens');
+const Drones = require('../Controllers/drones');
+const Pecas = require('../Controllers/pecas');
+
 // Ver todos os utilizadores
 routes.get('/users', async (req, res) => {
     try {
@@ -101,26 +106,9 @@ routes.post('/login', async (req, res) => {
     }
 
     if (gotUser) {
-        gotUser = gotUser[0]
-
-        const passwordMatch = await bcrypt.compare(password, gotUser.password);
-        if (passwordMatch) {
-            let token
-            try {
-                token = jwt.sign(
-                    {
-                        username: username,
-                        password: gotUser.password
-                    },
-                    "prgserver",
-                    { expiresIn: "1h" }
-                )
-                res.cookie('SessionToken', token)
-                res.status(200).send('Login feito com sucesso');
-            } catch (err) {
-                res.status(500).send(err.message);
-            }
-
+        const loggedIn = users.loginUser(gotUser, password);
+        if (loggedIn) {
+            res.status(200).send('Login feito com sucesso');
         } else {
             res.status(400).send("Incorrect Password.");
         }

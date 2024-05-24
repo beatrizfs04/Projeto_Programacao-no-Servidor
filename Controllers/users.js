@@ -74,4 +74,30 @@ users.deleteUsers = async function(){
     return deletedUsers;
 }
 
+users.loginUser = async function(gotUser, gotPassword) {
+    const User = gotUser[0]
+
+    const passwordMatch = await bcrypt.compare(gotPassword, User.password);
+    if (passwordMatch) {
+        let token
+        try {
+            token = jwt.sign(
+                {
+                    username: User.username,
+                    password: User.password
+                },
+                "prgserver",
+                { expiresIn: "1h" }
+            )
+            res.cookie('SessionToken', token);
+            return true;
+        } catch (err) {
+            res.status(500).send(err.message);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 module.exports = users;
