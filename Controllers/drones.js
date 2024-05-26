@@ -8,12 +8,14 @@ const DronesSchema = SQL.createSchema({
     droneModelo: { 
         type: String, 
         required: true, 
-        unique: true 
+        unique: true,
+        maxlength: [25, 'Tamanho minimo é 25.']
     },
     pecasDrone: [{
         nomePeca: { 
             type: String, 
-            required: true 
+            required: true,
+            maxlength: [25, 'Tamanho minimo é 25.']
         },
         quantidade: { 
             type: Number, 

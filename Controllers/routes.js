@@ -154,7 +154,7 @@ routes.post('/drones', async (req, res) => {
         if (existDrone.length > 0)
             return res.status(400).send(`Já existe um drone com o modelo: ${droneModelo}`);
 
-        const newDrone = { droneModelo: droneModelo, pecasDrone: newPecasDrone };
+        const newDrone = { droneModelo: droneModelo, pecasDrone: pecasDrone };
         const createdDrone = await Drones.createDrone(newDrone);
         return res.status(200).send(createdDrone);
 
