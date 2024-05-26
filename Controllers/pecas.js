@@ -4,7 +4,17 @@ const SQL = require('../Controllers/sql');
 const validator = require('validator');
 
 //Schema_Pecas
+
 const PecasSchema = SQL.createSchema({
+    nomePeca: { 
+        type: String, 
+        required: true,
+        maxlength: [25, 'Tamanho máximo é 25.']
+    },
+    quantidade: { 
+        type: Number, 
+        required: true 
+    }
 }, "pecas")
 
 const PecasDB = SQL.useSchema(PecasSchema, "pecas");
@@ -15,8 +25,8 @@ pecas.checkPecas = async function(){
     return gotPecas;
 }
 
-pecas.checkPeca = async function(pecaName){
-    const gotPeca = await PecasDB.find({peca: pecaName});
+pecas.checkPeca = async function(nomePeca){
+    const gotPeca = await PecasDB.find({peca: nomePeca});
     return gotPeca;
 }
 
@@ -31,8 +41,8 @@ pecas.createPeca = async function(newPecaData){
     return createdPeca;
 }
 
-pecas.deletePeca = async function(pecaName){
-    const deletedPeca = await PecasDB.findOneAndDelete(pecaName);
+pecas.deletePeca = async function(nomePeca){
+    const deletedPeca = await PecasDB.findOneAndDelete(nomePeca);
     return deletedPeca;
 }
 

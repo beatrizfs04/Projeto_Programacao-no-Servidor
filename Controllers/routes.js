@@ -204,4 +204,86 @@ routes.delete('/drones', async (req, res) => {
     }
 })
 
+// ----------------------- Peças ----------------------- //
+//Ver todas as pecas
+routes.get('/pecas', async (req, res) => {
+    try {
+        const gotPecas = await Pecas.checkPecas();
+        res.status(200).send(gotPecas);
+    } catch {
+        res.status(400).send(`Não foi possível acessar informações da PecasDB.`);
+    }
+})
+
+//ver uma peca através do nome
+routes.get('/pecas/:nomePeca', async (req, res) => {
+    const { nomePeca } = req.params;
+    try {
+        const gotPeca = await Pecas.checkPeca(nomePeca);
+        res.status(200).send(gotPeca);
+    } catch {
+        res.status(400).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.`);
+    }
+})
+
+//adicionar uma peca
+routes.post('/pecas', async (req, res) => {
+    const { nomePeca, quantidade } = req.body;
+    try {
+        const existPeca = await Pecas.checkPeca(nomePeca);
+
+        if (existPeca.length > 0)
+            return res.status(400).send(`Já existe uma peça com o nome: ${nomePeca}`);
+        
+        const newPecaData = { nomePeca: nomePeca, quantidade: quantidade };
+        const createdPeca = await Pecas.createPeca(newPecaData);
+        return res.status(200).send(createdPeca);
+
+    } catch (err) {
+        res.status(400).send(`${err.message}`);
+    }
+})
+
+//atualizar uma peca
+routes.patch('/pecas', async (req, res) => {
+    const { oldNomePeca, newNomePeca, newQuantidade } = req.body;
+    try {
+        const oldPeca = Pecas.checkPeca(oldNomePeca);
+        const newPecaData = { nomePeca: newNomePeca, quantidade: newQuantidade };
+        const updatedPeca = Pecas.updatePeca(oldPeca, newPecaData);
+
+        res.status(200).send(updatedPeca);
+    } catch {
+        res.status(400).send(`Não foi possível atualizar a peça com o nome: ${oldNomePeca}.`);
+    }
+})
+
+//apagar uma peca pelo nome
+routes.delete('/pecas/:nomePeca', async (req, res) => {
+    const { nomePeca } = req.params;
+    try {
+        const deletedPeca = await Pecas.deletePeca(nomePeca);
+
+        console.log(deletedPeca)
+        if (deletedPeca == null)
+            return res.status(404).end()
+
+
+        res.status(200).send(deletedPeca);
+    } catch {
+        res.status(400).send(`Não foi possível apagar a peça com o nome: ${nomePeca}.`);
+    }
+})
+
+//apagar todas as pecas
+routes.delete('/pecas', async (req, res) => {
+    try {
+        const deletedPecas = await Pecas.deletePecas();
+        res.status(200).send(deletedPecas);
+    } catch(err) {
+        res.status(400).send(`Não foi possível apagar as peças. ${err.message}`);
+    }
+})
+
+
 module.exports = routes;
