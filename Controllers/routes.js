@@ -135,7 +135,7 @@ routes.get('/drones', async (req, res) => {
 
 // Ver um drone através do modelo
 routes.get('/drones/:droneModelo', async (req, res) => {
-    const {droneModelo} = req.params;
+    const { droneModelo } = req.params;
     try {
         const gotDrone = await Drones.checkDrone(droneModelo);
         console.log(droneModelo)
@@ -148,13 +148,13 @@ routes.get('/drones/:droneModelo', async (req, res) => {
 
 // Criar um drone
 routes.post('/drones', async (req, res) => {
-    const { droneModelo } = req.body;
+    const { droneModelo, pecasDrone } = req.body;
     try {
         const existDrone = await Drones.checkDrone(droneModelo);
-
         if (existDrone.length > 0)
             return res.status(400).send(`Já existe um drone com o modelo: ${droneModelo}`);
-        const newDrone = { droneModelo: droneModelo };
+
+        const newDrone = { droneModelo: droneModelo, pecasDrone: newPecasDrone };
         const createdDrone = await Drones.createDrone(newDrone);
         return res.status(200).send(createdDrone);
 
@@ -165,9 +165,9 @@ routes.post('/drones', async (req, res) => {
 
 // Atualizar os dados de um drone
 routes.patch('/drones', async (req, res) => {
-    const { oldDroneModelo, newDroneModelo } = req.body;
+    const { oldDroneModelo, newDroneModelo, newPecasDrone } = req.body;
     try {
-        const newDrone = { droneModelo: newDroneModelo };
+        const newDrone = { droneModelo: newDroneModelo, pecasDrone: newPecasDrone };
         const oldDrone = Drones.checkDrone(oldDroneModelo);
         const updatedDrone = Drones.updateDrone(oldDrone, newDrone);
 

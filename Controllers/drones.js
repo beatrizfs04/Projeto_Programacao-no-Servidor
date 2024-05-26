@@ -5,12 +5,21 @@ const validator = require('validator');
 
 //Schema_Drones
 const DronesSchema = SQL.createSchema({
-    droneModelo: {
-        type: String,
-        required: true,
-        unique: true,
-        minlength: [25, 'Tamanho minimo é 25.'],
-    }
+    droneModelo: { 
+        type: String, 
+        required: true, 
+        unique: true 
+    },
+    pecasDrone: [{
+        nomePeca: { 
+            type: String, 
+            required: true 
+        },
+        quantidade: { 
+            type: Number, 
+            required: true 
+        }
+    }]
 }, "drones")
 
 const DronesDB = SQL.useSchema(DronesSchema, "drones");
