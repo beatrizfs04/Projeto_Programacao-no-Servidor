@@ -5,6 +5,12 @@ const validator = require('validator');
 
 //Schema_Drones
 const DronesSchema = SQL.createSchema({
+    droneModelo: {
+        type: String,
+        required: true,
+        unique: true,
+        minlength: [25, 'Tamanho minimo é 25.'],
+    }
 }, "drones")
 
 const DronesDB = SQL.useSchema(DronesSchema, "drones");
@@ -31,9 +37,9 @@ drones.createDrone = async function(newDroneData){
     return createdDrone;
 }
 
-drones.deletedDrone = async function(droneData){
-    const deletedDrone = await DronesDB.findOneAndDelete(droneData);
-    return deletedDrone;
+drones.deleteDrone = async function(droneData){
+    const deleteDrone = await DronesDB.findOneAndDelete(droneData);
+    return deleteDrone;
 }
 
 drones.deleteDrones = async function(){

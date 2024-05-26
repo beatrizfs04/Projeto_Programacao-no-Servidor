@@ -11,6 +11,9 @@ const Montagens = require('../Controllers/montagens');
 const Drones = require('../Controllers/drones');
 const Pecas = require('../Controllers/pecas');
 
+
+// ----------------------- Users ----------------------- //
+
 // Ver todos os utilizadores
 routes.get('/users', async (req, res) => {
     try {
@@ -114,6 +117,90 @@ routes.post('/login', async (req, res) => {
         }
     } else {
         res.status(404).send("Username not Found.");
+    }
+})
+
+
+// ----------------------- Drones ----------------------- //
+
+// Ver todos os drones
+routes.get('/drones', async (req, res) => {
+    try {
+        const gotDrones = await Drones.checkDrones();
+        res.status(200).send(gotDrones);
+    } catch {
+        res.status(400).send(`Não foi possivel aceder à informação da DronesDB.`);
+    }
+})
+
+// Ver um drone através do modelo
+routes.get('/drones/:droneModelo', async (req, res) => {
+    const {droneModelo} = req.params;
+    try {
+        const gotDrone = await Drones.checkDrone(droneModelo);
+        console.log(droneModelo)
+        console.log(gotDrone)
+        res.status(200).send(gotDrone);
+    } catch {
+        res.status(400).send(`Não foi possivel encontrar o drone com o modelo: ${droneModelo}.`);
+    }
+})
+
+// Criar um drone
+routes.post('/drones', async (req, res) => {
+    const { droneModelo } = req.body;
+    try {
+        const existDrone = await Drones.checkDrone(droneModelo);
+
+        if (existDrone.length > 0)
+            return res.status(400).send(`Já existe um drone com o modelo: ${droneModelo}`);
+        const newDrone = { droneModelo: droneModelo };
+        const createdDrone = await Drones.createDrone(newDrone);
+        return res.status(200).send(createdDrone);
+
+    } catch (err) {
+        res.status(400).send(`${err.message}`);
+    }
+})
+
+// Atualizar os dados de um drone
+routes.patch('/drones', async (req, res) => {
+    const { oldDroneModelo, newDroneModelo } = req.body;
+    try {
+        const newDrone = { droneModelo: newDroneModelo };
+        const oldDrone = Drones.checkDrone(oldDroneModelo);
+        const updatedDrone = Drones.updateDrone(oldDrone, newDrone);
+
+        res.status(200).send(updatedDrone);
+    } catch {
+        res.status(400).send(`Não foi possivel atualizar o drone com o modelo: ${oldDroneModelo}, para o novo modelo: ${newDroneModelo}.`);
+    }
+})
+
+// Apagar um drone através do modelo
+routes.delete('/drones/:droneModelo', async (req, res) => {
+    const { droneModelo } = req.params;
+    try {
+        const deletedDrone = await Drones.deleteDrone(droneModelo);
+
+        console.log(deletedDrone)
+        if (deletedDrone == null)
+            return res.status(404).end()
+
+
+        res.status(200).send(deletedDrone);
+    } catch {
+        res.status(400).send(`Não foi possivel apagar o drone com o modelo: ${droneModelo}.`);
+    }
+})
+
+// Apagar todos os drones
+routes.delete('/drones', async (req, res) => {
+    try {
+        const deletedDrones = Drones.deleteDrones();
+        res.status(200).send(deletedDrones);
+    } catch(err) {
+        res.status(400).send(`Não foi possivel apagar os drones. ${err.message}`);
     }
 })
 
