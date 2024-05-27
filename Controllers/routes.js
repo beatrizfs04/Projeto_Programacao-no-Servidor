@@ -285,5 +285,8 @@ routes.delete('/pecas', async (req, res) => {
     }
 })
 
+// ----------------------- Peças ----------------------- //
+/* Fazer com que ao criar uma montagem, verificar a quantidade de peças em stock no pecas.js para a quantidade de peças precisas
+No caso de não ter peças suficientes para criar uma montagem, avisar e negar a dizer que não tem peças suficientes no stock */
 
 module.exports = routes;
