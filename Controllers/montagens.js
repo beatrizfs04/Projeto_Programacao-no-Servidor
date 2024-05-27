@@ -15,8 +15,8 @@ montagens.checkMontagens = async function(){
     return gotMontagens;
 }
 
-montagens.checkMontagem = async function(/* Conteudo a Procurar na Montagem */){
-    const gotMontagem = await MontagensDB.find({/* Conteudo a Procurar na Montagem */});
+montagens.checkMontagem = async function(droneModel, workerName, startDate){
+    const gotMontagem = await MontagensDB.find({ droneModel: droneModel, workerName: workerName, startDate: startDate});
     return gotMontagem;
 }
 
