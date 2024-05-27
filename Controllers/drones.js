@@ -32,8 +32,8 @@ drones.checkDrones = async function(){
     return gotDrones;
 }
 
-drones.checkDrone = async function(/* Conteudo a Procurar na Drone */){
-    const gotDrone = await DronesDB.find({/* Conteudo a Procurar na Drone */});
+drones.checkDrone = async function(droneModel){
+    const gotDrone = await DronesDB.find({droneModelo: droneModel});
     return gotDrone;
 }
 
