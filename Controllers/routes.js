@@ -170,8 +170,8 @@ routes.patch('/drones', isAuthorized, async (req, res) => {
     const { oldDroneModelo, newDroneModelo, newPecasDrone } = req.body;
     try {
         const newDrone = { droneModelo: newDroneModelo, pecasDrone: newPecasDrone };
-        const oldDrone = Drones.checkDrone(oldDroneModelo);
-        const updatedDrone = Drones.updateDrone(oldDrone, newDrone);
+        const oldDrone = await Drones.checkDrone(oldDroneModelo);
+        const updatedDrone = await Drones.updateDrone(oldDrone, newDrone);
 
         res.status(200).send(updatedDrone);
     } catch {

@@ -38,7 +38,7 @@ drones.checkDrone = async function(droneModel){
 }
 
 drones.updateDrone = async function(oldDrone, newDrone){
-    const updatedDrone = await DronesDB.findOneAndUpdate(oldDrone, newDrone);
+    const updatedDrone = await DronesDB.findOneAndUpdate(oldDrone, newDrone, {new: true});
     return updatedDrone;
 }
 
