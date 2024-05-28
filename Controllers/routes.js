@@ -142,8 +142,6 @@ routes.get('/drones/:droneModelo', isAuthorized, async (req, res) => {
     const { droneModelo } = req.params;
     try {
         const gotDrone = await Drones.checkDrone(droneModelo);
-        console.log(droneModelo)
-        console.log(gotDrone)
         res.status(200).send(gotDrone);
     } catch {
         res.status(400).send(`Não foi possivel encontrar o drone com o modelo: ${droneModelo}.`);

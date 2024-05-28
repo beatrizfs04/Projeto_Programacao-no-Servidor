@@ -33,7 +33,7 @@ drones.checkDrones = async function(){
 }
 
 drones.checkDrone = async function(droneModel){
-    const gotDrone = await DronesDB.find({droneModelo: droneModel});
+    const gotDrone = await DronesDB.findOne({droneModelo: droneModel});
     return gotDrone;
 }
 
