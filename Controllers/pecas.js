@@ -58,7 +58,7 @@ pecas.createPeca = async function (newPecaData) {
 
 pecas.deletePeca = async function (nomePeca) {
     try {
-        const deletedPeca = await PecasDB.findOneAndDelete(nomePeca);
+        const deletedPeca = await PecasDB.findOneAndDelete({nomePeca: nomePeca});
         return deletedPeca;
     } catch (err) {
         throw err;
