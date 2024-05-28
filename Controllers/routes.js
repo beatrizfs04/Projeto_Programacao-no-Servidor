@@ -58,14 +58,17 @@ routes.post('/users', async (req, res) => {
 routes.patch('/users', isAuthorized, async (req, res) => {
     const { oldUsername, newUsername, newEmail, newPassword, newPhone } = req.body;
     try {
+        if(!oldUsername || !newUsername || !newEmail || !newPassword || !newPhone)
+            return res.status(400).send('Missing parameters');
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         const newUser = { username: newUsername, email: newEmail, password: hashedPassword, phone: newPhone };
-        const oldUser = Users.checkUser(oldUsername);
-        const updateUser = Users.updateUser(oldUser, newUser);
+        const oldUser = await Users.checkUser(oldUsername);
+        const updateUser = await Users.updateUser(oldUser, newUser);
 
         res.status(200).send(updateUser);
-    } catch {
-        res.status(400).send(`Não foi possivel atualizar o utilizador com o username: ${username}, para o novo user: ${newUser}.`);
+    } catch(err) {
+        res.status(400).send(`Erro:${err.message}`);
     }
 })
 

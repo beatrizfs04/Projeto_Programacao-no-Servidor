@@ -53,7 +53,7 @@ users.checkUser = async function(username){
 
 // Atualiza um utilizador na BD pelos valores no body
 users.updateUser = async function(oldUser, newUser){
-    const updatedUser = await UsersDB.findOneAndUpdate(oldUser, newUser);
+    const updatedUser = await UsersDB.findOneAndUpdate(oldUser, newUser, { new: true });
     return updatedUser;
 }
 
