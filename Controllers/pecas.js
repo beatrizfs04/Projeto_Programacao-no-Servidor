@@ -26,7 +26,7 @@ pecas.checkPecas = async function(){
 }
 
 pecas.checkPeca = async function(nomePeca){
-    const gotPeca = await PecasDB.find({peca: nomePeca});
+    const gotPeca = await PecasDB.find({nomePeca: nomePeca});
     return gotPeca;
 }
 
