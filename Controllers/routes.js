@@ -15,7 +15,7 @@ const Pecas = require('../Controllers/pecas');
 // ----------------------- Users ----------------------- //
 
 // Ver todos os utilizadores
-routes.get('/users', async (req, res) => {
+routes.get('/users', isAuthorized, async (req, res) => {
     try {
         const gotUsers = await Users.checkUsers();
         res.status(200).send(gotUsers);
@@ -25,7 +25,7 @@ routes.get('/users', async (req, res) => {
 })
 
 // Ver um utilizador através do username
-routes.get('/users/:username', async (req, res) => {
+routes.get('/users/:username', isAuthorized, async (req, res) => {
     const { username } = req.params;
     try {
         const gotUser = await Users.checkUser(username);
@@ -42,7 +42,7 @@ routes.post('/users', async (req, res) => {
         const existUser = await Users.checkUser(username);
 
         if (existUser)
-            return res.status(400).send(`Já existe um utilizador com o username: ${username}`);
+            return res.status(400).send(`Ups, Algo Correu Mal...`);
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = { username: username, email: email, password: hashedPassword, phone: phone };
@@ -55,7 +55,7 @@ routes.post('/users', async (req, res) => {
 })
 
 // Atualizar os dados de um utilizador
-routes.patch('/users', async (req, res) => {
+routes.patch('/users', isAuthorized, async (req, res) => {
     const { oldUsername, newUsername, newEmail, newPassword, newPhone } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -70,7 +70,7 @@ routes.patch('/users', async (req, res) => {
 })
 
 // Apagar um utilizador através do username
-routes.delete('/users/:username', async (req, res) => {
+routes.delete('/users/:username', isAuthorized, async (req, res) => {
     const { username } = req.params;
     try {
         const deletedUser = await Users.deleteUser(username);
@@ -87,7 +87,7 @@ routes.delete('/users/:username', async (req, res) => {
 })
 
 // Apagar todos os utilizadores
-routes.delete('/users', async (req, res) => {
+routes.delete('/users', isAuthorized, async (req, res) => {
     try {
         const deletedUsers = Users.deleteUsers();
         res.status(200).send(deletedUsers);
@@ -107,12 +107,12 @@ routes.post('/login', async (req, res) => {
             const cookie = await Users.loginUser(gotUser, password);
             if (cookie) {
                 res.cookie('Authentication', cookie)
-                return res.status(200).send('Login feito com sucesso');
+                return res.status(200).send('Credenciais Aprovadas!');
             } else {
-                return res.status(404).send("Incorrect username or password.");
+                return res.status(404).send("Credenciais Incorretas.");
             }
         } else {
-            return res.status(404).send("Incorrect username or password.");
+            return res.status(404).send("Credenciais Incorretas.");
         }
 
     } catch (err) {
@@ -125,7 +125,7 @@ routes.post('/login', async (req, res) => {
 // ----------------------- Drones ----------------------- //
 
 // Ver todos os drones
-routes.get('/drones', async (req, res) => {
+routes.get('/drones', isAuthorized, async (req, res) => {
     try {
         const gotDrones = await Drones.checkDrones();
         res.status(200).send(gotDrones);
@@ -135,7 +135,7 @@ routes.get('/drones', async (req, res) => {
 })
 
 // Ver um drone através do modelo
-routes.get('/drones/:droneModelo', async (req, res) => {
+routes.get('/drones/:droneModelo', isAuthorized, async (req, res) => {
     const { droneModelo } = req.params;
     try {
         const gotDrone = await Drones.checkDrone(droneModelo);
@@ -148,7 +148,7 @@ routes.get('/drones/:droneModelo', async (req, res) => {
 })
 
 // Criar um drone
-routes.post('/drones', async (req, res) => {
+routes.post('/drones', isAuthorized, async (req, res) => {
     const { droneModelo, pecasDrone } = req.body;
     try {
         const existDrone = await Drones.checkDrone(droneModelo);
@@ -165,7 +165,7 @@ routes.post('/drones', async (req, res) => {
 })
 
 // Atualizar os dados de um drone
-routes.patch('/drones', async (req, res) => {
+routes.patch('/drones', isAuthorized, async (req, res) => {
     const { oldDroneModelo, newDroneModelo, newPecasDrone } = req.body;
     try {
         const newDrone = { droneModelo: newDroneModelo, pecasDrone: newPecasDrone };
@@ -179,7 +179,7 @@ routes.patch('/drones', async (req, res) => {
 })
 
 // Apagar um drone através do modelo
-routes.delete('/drones/:droneModelo', async (req, res) => {
+routes.delete('/drones/:droneModelo', isAuthorized, async (req, res) => {
     const { droneModelo } = req.params;
     try {
         const deletedDrone = await Drones.deleteDrone(droneModelo);
@@ -196,7 +196,7 @@ routes.delete('/drones/:droneModelo', async (req, res) => {
 })
 
 // Apagar todos os drones
-routes.delete('/drones', async (req, res) => {
+routes.delete('/drones', isAuthorized, async (req, res) => {
     try {
         const deletedDrones = Drones.deleteDrones();
         res.status(200).send(deletedDrones);
@@ -207,7 +207,7 @@ routes.delete('/drones', async (req, res) => {
 
 // ----------------------- Peças ----------------------- //
 //Ver todas as pecas
-routes.get('/pecas', async (req, res) => {
+routes.get('/pecas', isAuthorized, async (req, res) => {
     try {
         const gotPecas = await Pecas.checkPecas();
         res.status(200).send(gotPecas);
@@ -217,7 +217,7 @@ routes.get('/pecas', async (req, res) => {
 })
 
 //ver uma peca através do nome
-routes.get('/pecas/:nomePeca', async (req, res) => {
+routes.get('/pecas/:nomePeca', isAuthorized, async (req, res) => {
     const { nomePeca } = req.params;
     try {
         const gotPeca = await Pecas.checkPeca(nomePeca);
@@ -228,7 +228,7 @@ routes.get('/pecas/:nomePeca', async (req, res) => {
 })
 
 //adicionar uma peca
-routes.post('/pecas', async (req, res) => {
+routes.post('/pecas', isAuthorized, async (req, res) => {
     const { nomePeca, quantidade } = req.body;
     try {
         const existPeca = await Pecas.checkPeca(nomePeca);
@@ -246,7 +246,7 @@ routes.post('/pecas', async (req, res) => {
 })
 
 //atualizar uma peca
-routes.patch('/pecas', async (req, res) => {
+routes.patch('/pecas', isAuthorized, async (req, res) => {
     const { oldNomePeca, newNomePeca, newQuantidade } = req.body;
     try {
         const oldPeca = await Pecas.checkPeca(oldNomePeca);
@@ -263,7 +263,7 @@ routes.patch('/pecas', async (req, res) => {
 })
 
 //apagar uma peca pelo nome
-routes.delete('/pecas/:nomePeca', async (req, res) => {
+routes.delete('/pecas/:nomePeca', isAuthorized, async (req, res) => {
     const { nomePeca } = req.params;
     try {
         const deletedPeca = await Pecas.deletePeca(nomePeca);
@@ -280,7 +280,7 @@ routes.delete('/pecas/:nomePeca', async (req, res) => {
 })
 
 //apagar todas as pecas
-routes.delete('/pecas', async (req, res) => {
+routes.delete('/pecas', isAuthorized, async (req, res) => {
     try {
         const deletedPecas = await Pecas.deletePecas();
         res.status(200).send(deletedPecas);
@@ -291,7 +291,7 @@ routes.delete('/pecas', async (req, res) => {
 
 // ----------------------- Montagens ----------------------- //
 
-routes.get('/montagens', async (req, res) => {
+routes.get('/montagens', isAuthorized, async (req, res) => {
     try {
         const montagensList = await Montagens.checkMontagens();
         res.status(200).json(montagensList);
@@ -300,7 +300,7 @@ routes.get('/montagens', async (req, res) => {
     }
 });
 
-routes.get('/montagem', async (req, res) => {
+routes.get('/montagem', isAuthorized, async (req, res) => {
     const { droneModel, workerName, startDate } = req.body;
     try {
         const montagem = await Montagens.checkMontagem(droneModel, workerName, startDate);
@@ -324,7 +324,7 @@ routes.put('/montagem', isAuthorized, async (req, res) => {
     }
 });
 
-routes.post('/montagem', isAuthorized ,async (req, res) => {
+routes.post('/montagem', isAuthorized, async (req, res) => {
     const newMontagemData = req.body;
     try {
         const createdMontagem = await Montagens.createMontagem(newMontagemData, req.user);
@@ -335,7 +335,7 @@ routes.post('/montagem', isAuthorized ,async (req, res) => {
 });
 
 
-routes.delete('/montagem', async (req, res) => {
+routes.delete('/montagem', isAuthorized, async (req, res) => {
     const montagemData = req.body;
     try {
         const deletedMontagem = await Montagens.deleteMontagem(montagemData);
@@ -345,7 +345,7 @@ routes.delete('/montagem', async (req, res) => {
     }
 });
 
-routes.delete('/montagens', async (req, res) => {
+routes.delete('/montagens', isAuthorized, async (req, res) => {
     try {
         const deletedMontagens = await Montagens.deleteMontagens();
         res.status(200).json(deletedMontagens);
