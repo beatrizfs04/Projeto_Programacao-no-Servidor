@@ -153,7 +153,7 @@ routes.post('/drones', isAuthorized, async (req, res) => {
     const { droneModelo, pecasDrone } = req.body;
     try {
         const existDrone = await Drones.checkDrone(droneModelo);
-        if (existDrone.length > 0)
+        if (existDrone)
             return res.status(400).send(`Já existe um drone com o modelo: ${droneModelo}`);
 
         const newDrone = { droneModelo: droneModelo, pecasDrone: pecasDrone };

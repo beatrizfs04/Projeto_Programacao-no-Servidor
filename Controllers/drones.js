@@ -49,7 +49,7 @@ drones.createDrone = async function(newDroneData){
 }
 
 drones.deleteDrone = async function(droneData){
-    const deleteDrone = await DronesDB.findOneAndDelete(droneData);
+    const deleteDrone = await DronesDB.findOneAndDelete({droneModelo: droneData});
     return deleteDrone;
 }
 
