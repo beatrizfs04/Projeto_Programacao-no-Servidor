@@ -4,7 +4,7 @@ const SQL = require('../Controllers/sql');
 const validator = require('validator');
 
 //Schema_Users
-const UsersSchema = SQL.createSchema({
+users.UsersSchema = SQL.createSchema({
     username: {
         type: String,
         required: true,
@@ -34,7 +34,7 @@ const UsersSchema = SQL.createSchema({
     },
 }, "users")
 
-const UsersDB = SQL.useSchema(UsersSchema, "users");
+const UsersDB = SQL.useSchema(users.UsersSchema, "users");
 
 
 // Procura todos os utilizadores na BD

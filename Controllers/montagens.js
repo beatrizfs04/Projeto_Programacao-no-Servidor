@@ -3,10 +3,15 @@ const montagens = express.Router();
 const SQL = require('../Controllers/sql');
 const validator = require('validator');
 
+const Pecas = require('../Controllers/pecas');
+const Drones = require('../Controllers/drones');
+
+const PecasDB = SQL.useSchema(Pecas.PecasSchema, "pecas");
+const DronesDB = SQL.useSchema(Drones.DronesSchema, "drones");
 //Schema_Montagens
 
 // Define the Montagens Schema
-const MontagensSchema = SQL.createSchema({
+montagens.MontagensSchema = SQL.createSchema({
     droneModel: { 
         type: String, 
         required: true,
@@ -48,7 +53,7 @@ const MontagensSchema = SQL.createSchema({
 }, "montagens");
 
 
-const MontagensDB = SQL.useSchema(MontagensSchema, "montagens");
+const MontagensDB = SQL.useSchema(montagens.MontagensSchema, "montagens");
 
 // Procura todos as peças na BD
 montagens.checkMontagens = async function() {
@@ -72,17 +77,20 @@ montagens.checkMontagem = async function(droneModel, workerName, startDate) {
 
 // Update montagem
 montagens.updateMontagem = async function(oldMontagem, newMontagem) {
+
+    // newMontagem.startDate = Date.now(); // Atualizar a start date ? Por ventura não
+
     const session = await MontagensDB.startSession();
     session.startTransaction();
     
     try {
-        // Fetch the old montagem data
+        // Obter dados da montagem antiga
         const existingMontagem = await MontagensDB.findOne(oldMontagem).session(session);
         if (!existingMontagem) {
             throw new Error("Montagem não encontrada");
         }
 
-        // Calculate the difference in parts usage
+        // Calcular a diferença nas partes usadas
         const oldPartsUsage = existingMontagem.pecasUsadas.reduce((acc, peca) => {
             acc[peca.nomePeca] = peca.quantidade;
             return acc;
@@ -93,7 +101,7 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
             return acc;
         }, {});
 
-        const partsToCheck = new Set([...Object.keys(oldPartsUsage), ...Object.keys(newPartsUsage)]);
+        const partsToCheck = new Set([...Object.keys(oldPartsUsage), ...Object.keys(newPartsUsage)]); // Criar um set com as keys das peças para depois averiguarmos cada para fazer calculos com o stock
 
         // Verificar o estoque de cada peça a ser usada na montagem
         for (let nomePeca of partsToCheck) {
@@ -102,6 +110,7 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
             const difference = newQuantity - oldQuantity;
 
             if (difference > 0) {
+                // Remover peças adicionais do stock
                 const peca = await PecasDB.findOne({ nomePeca }).session(session);
                 if (!peca) {
                     throw new Error(`Peça ${nomePeca} não existe no stock.`);
@@ -118,7 +127,7 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
                     { session }
                 );
             } else if (difference < 0) {
-                // Return stock for removed parts
+                // Devolver stock das peças removidas
                 await PecasDB.updateOne(
                     { nomePeca },
                     { $inc: { quantidade: -difference } }, // Incrementar negativamente
@@ -127,7 +136,7 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
             }
         }
 
-        // Update the montagem
+        // Atualizar a montagem
         const updatedMontagem = await MontagensDB.findOneAndUpdate(oldMontagem, newMontagem, { new: true, session });
 
         await session.commitTransaction();
@@ -143,6 +152,8 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
 
 // Criar montagem
 montagens.createMontagem = async function(newMontagemData) {
+    newMontagemData.startDate = Date.now(); // Data da montagem inicial de agora
+
     // Verificar o estoque de cada peça a ser usada na montagem
     for (let i = 0; i < newMontagemData.pecasUsadas.length; i++) {
         const pecaUsada = newMontagemData.pecasUsadas[i];

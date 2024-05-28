@@ -4,7 +4,7 @@ const SQL = require('../Controllers/sql');
 const validator = require('validator');
 
 //Schema_Drones
-const DronesSchema = SQL.createSchema({
+drones.DronesSchema = SQL.createSchema({
     droneModelo: { 
         type: String, 
         required: true, 
@@ -24,7 +24,7 @@ const DronesSchema = SQL.createSchema({
     }]
 }, "drones")
 
-const DronesDB = SQL.useSchema(DronesSchema, "drones");
+const DronesDB = SQL.useSchema(drones.DronesSchema, "drones");
 
 // Procura todos os drones na BD
 drones.checkDrones = async function(){

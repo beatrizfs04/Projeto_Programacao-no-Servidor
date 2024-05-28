@@ -4,8 +4,7 @@ const SQL = require('../Controllers/sql');
 const validator = require('validator');
 
 //Schema_Pecas
-
-const PecasSchema = SQL.createSchema({
+pecas.PecasSchema = SQL.createSchema({
     nomePeca: {
         type: String,
         required: true,
@@ -17,7 +16,7 @@ const PecasSchema = SQL.createSchema({
     }
 }, "pecas")
 
-const PecasDB = SQL.useSchema(PecasSchema, "pecas");
+const PecasDB = SQL.useSchema(pecas.PecasSchema, "pecas");
 
 // Procura todos as peças na BD
 pecas.checkPecas = async function () {
