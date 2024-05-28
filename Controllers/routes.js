@@ -249,10 +249,9 @@ routes.patch('/pecas', async (req, res) => {
     const { oldNomePeca, newNomePeca, newQuantidade } = req.body;
     try {
         const oldPeca = await Pecas.checkPeca(oldNomePeca);
-        console.log
         if (!oldPeca)
             return res.status(404).send(`Não existe uma peça com nome ${oldNomePeca}`)
-
+        
         const newPecaData = { nomePeca: newNomePeca, quantidade: newQuantidade };
         const updatedPeca = await Pecas.updatePeca(oldPeca, newPecaData);
 
@@ -293,7 +292,7 @@ routes.delete('/pecas', async (req, res) => {
 
 routes.get('/montagens', async (req, res) => {
     try {
-        const montagensList = await montagens.checkMontagens();
+        const montagensList = await Montagens.checkMontagens();
         res.status(200).json(montagensList);
     } catch (err) {
         res.status(400).send(`Erro ao procurar todas as montagens: ${err.message}`);
@@ -301,9 +300,9 @@ routes.get('/montagens', async (req, res) => {
 });
 
 routes.get('/montagem', async (req, res) => {
-    const { droneModel, workerName, startDate } = req.query;
+    const { droneModel, workerName, startDate } = req.body;
     try {
-        const montagem = await montagens.checkMontagem(droneModel, workerName, startDate);
+        const montagem = await Montagens.checkMontagem(droneModel, workerName, startDate);
         if (!montagem) {
             return res.status(404).send('Montagem não encontrada');
         }
@@ -314,9 +313,10 @@ routes.get('/montagem', async (req, res) => {
 });
 
 routes.put('/montagem', async (req, res) => {
-    const { oldMontagem, newMontagem } = req.body;
+    const oldMontagem = { droneModel : req.body.oldDroneModel, workerName: req.body.oldWorkerName, startDate: req.body.startDate}
+    const newMontagem = { droneModel: req.body.droneModel, workerName: req.body.workerName, pecasUsadas: req.body.pecasUsadas}
     try {
-        const updatedMontagem = await montagens.updateMontagem(oldMontagem, newMontagem);
+        const updatedMontagem = await Montagens.updateMontagem(oldMontagem, newMontagem);
         res.status(200).json(updatedMontagem);
     } catch (err) {
         res.status(400).send(`Erro ao atualizar a montagem: ${err.message}`);
@@ -326,7 +326,7 @@ routes.put('/montagem', async (req, res) => {
 routes.post('/montagem', async (req, res) => {
     const newMontagemData = req.body;
     try {
-        const createdMontagem = await montagens.createMontagem(newMontagemData);
+        const createdMontagem = await Montagens.createMontagem(newMontagemData);
         res.status(201).json(createdMontagem);
     } catch (err) {
         res.status(400).send(`Erro ao criar a montagem: ${err.message}`);
@@ -337,7 +337,7 @@ routes.post('/montagem', async (req, res) => {
 routes.delete('/montagem', async (req, res) => {
     const montagemData = req.body;
     try {
-        const deletedMontagem = await montagens.deleteMontagem(montagemData);
+        const deletedMontagem = await Montagens.deleteMontagem(montagemData);
         res.status(200).json(deletedMontagem);
     } catch (err) {
         res.status(400).send(`Erro ao apagar a montagem: ${err.message}`);
@@ -346,7 +346,7 @@ routes.delete('/montagem', async (req, res) => {
 
 routes.delete('/montagens', async (req, res) => {
     try {
-        const deletedMontagens = await montagens.deleteMontagens();
+        const deletedMontagens = await Montagens.deleteMontagens();
         res.status(200).json(deletedMontagens);
     } catch (err) {
         res.status(400).send(`Erro ao apagar todas as montagens: ${err.message}`);
