@@ -19,8 +19,8 @@ routes.get('/users', isAuthorized, async (req, res) => {
     try {
         const gotUsers = await Users.checkUsers();
         res.status(200).send(gotUsers);
-    } catch {
-        res.status(400).send(`Não foi possivel aceder à informação da UsersDB.`);
+    } catch(err) {
+        res.status(400).send(`Não foi possivel aceder à informação da UsersDB. \nErro:${err.message}`);
     }
 })
 
@@ -270,7 +270,7 @@ routes.delete('/pecas/:nomePeca', isAuthorized, async (req, res) => {
 
         console.log(deletedPeca)
         if (deletedPeca == null)
-            return res.status(404).end()
+            return res.status(404).send(`A peça ${nomePeca} não existe !`)
 
 
         res.status(200).send(deletedPeca);
