@@ -222,6 +222,9 @@ routes.get('/pecas/:nomePeca', isAuthorized, async (req, res) => {
     const { nomePeca } = req.params;
     try {
         const gotPeca = await Pecas.checkPeca(nomePeca);
+        if(!gotPeca)
+            return res.status(404).send("Nenhuma peça encontrada")
+
         res.status(200).send(gotPeca);
     } catch {
         res.status(400).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
