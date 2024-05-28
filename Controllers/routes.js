@@ -211,7 +211,7 @@ routes.get('/pecas', async (req, res) => {
         const gotPecas = await Pecas.checkPecas();
         res.status(200).send(gotPecas);
     } catch {
-        res.status(400).send(`Não foi possível acessar informações da PecasDB.`);
+        res.status(400).send(`Não foi possível acessar informações da PecasDB. \n Erro: ${err.message}`);
     }
 })
 
@@ -222,7 +222,7 @@ routes.get('/pecas/:nomePeca', async (req, res) => {
         const gotPeca = await Pecas.checkPeca(nomePeca);
         res.status(200).send(gotPeca);
     } catch {
-        res.status(400).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.`);
+        res.status(400).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
     }
 })
 
@@ -232,7 +232,7 @@ routes.post('/pecas', async (req, res) => {
     try {
         const existPeca = await Pecas.checkPeca(nomePeca);
 
-        if (existPeca.length > 0)
+        if (existPeca)
             return res.status(400).send(`Já existe uma peça com o nome: ${nomePeca}`);
         
         const newPecaData = { nomePeca: nomePeca, quantidade: quantidade };
@@ -248,13 +248,17 @@ routes.post('/pecas', async (req, res) => {
 routes.patch('/pecas', async (req, res) => {
     const { oldNomePeca, newNomePeca, newQuantidade } = req.body;
     try {
-        const oldPeca = Pecas.checkPeca(oldNomePeca);
+        const oldPeca = await Pecas.checkPeca(oldNomePeca);
+        console.log
+        if (!oldPeca)
+            return res.status(404).send(`Não existe uma peça com nome ${oldNomePeca}`)
+
         const newPecaData = { nomePeca: newNomePeca, quantidade: newQuantidade };
-        const updatedPeca = Pecas.updatePeca(oldPeca, newPecaData);
+        const updatedPeca = await Pecas.updatePeca(oldPeca, newPecaData);
 
         res.status(200).send(updatedPeca);
-    } catch {
-        res.status(400).send(`Não foi possível atualizar a peça com o nome: ${oldNomePeca}.`);
+    } catch (err) {
+        res.status(400).send(`Não foi possível atualizar a peça com o nome: ${oldNomePeca}.\n Erro: ${err.message}`);
     }
 })
 
@@ -270,8 +274,8 @@ routes.delete('/pecas/:nomePeca', async (req, res) => {
 
 
         res.status(200).send(deletedPeca);
-    } catch {
-        res.status(400).send(`Não foi possível apagar a peça com o nome: ${nomePeca}.`);
+    } catch(err) {
+        res.status(400).send(`Não foi possível apagar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
     }
 })
 
@@ -285,8 +289,68 @@ routes.delete('/pecas', async (req, res) => {
     }
 })
 
-// ----------------------- Peças ----------------------- //
-/* Fazer com que ao criar uma montagem, verificar a quantidade de peças em stock no pecas.js para a quantidade de peças precisas
-No caso de não ter peças suficientes para criar uma montagem, avisar e negar a dizer que não tem peças suficientes no stock */
+// ----------------------- Montagens ----------------------- //
+
+routes.get('/montagens', async (req, res) => {
+    try {
+        const montagensList = await montagens.checkMontagens();
+        res.status(200).json(montagensList);
+    } catch (err) {
+        res.status(400).send(`Erro ao procurar todas as montagens: ${err.message}`);
+    }
+});
+
+routes.get('/montagem', async (req, res) => {
+    const { droneModel, workerName, startDate } = req.query;
+    try {
+        const montagem = await montagens.checkMontagem(droneModel, workerName, startDate);
+        if (!montagem) {
+            return res.status(404).send('Montagem não encontrada');
+        }
+        res.status(200).json(montagem);
+    } catch (err) {
+        res.status(400).send(`Erro ao procurar a montagem: ${err.message}`);
+    }
+});
+
+routes.put('/montagem', async (req, res) => {
+    const { oldMontagem, newMontagem } = req.body;
+    try {
+        const updatedMontagem = await montagens.updateMontagem(oldMontagem, newMontagem);
+        res.status(200).json(updatedMontagem);
+    } catch (err) {
+        res.status(400).send(`Erro ao atualizar a montagem: ${err.message}`);
+    }
+});
+
+routes.post('/montagem', async (req, res) => {
+    const newMontagemData = req.body;
+    try {
+        const createdMontagem = await montagens.createMontagem(newMontagemData);
+        res.status(201).json(createdMontagem);
+    } catch (err) {
+        res.status(400).send(`Erro ao criar a montagem: ${err.message}`);
+    }
+});
+
+
+routes.delete('/montagem', async (req, res) => {
+    const montagemData = req.body;
+    try {
+        const deletedMontagem = await montagens.deleteMontagem(montagemData);
+        res.status(200).json(deletedMontagem);
+    } catch (err) {
+        res.status(400).send(`Erro ao apagar a montagem: ${err.message}`);
+    }
+});
+
+routes.delete('/montagens', async (req, res) => {
+    try {
+        const deletedMontagens = await montagens.deleteMontagens();
+        res.status(200).json(deletedMontagens);
+    } catch (err) {
+        res.status(400).send(`Erro ao apagar todas as montagens: ${err.message}`);
+    }
+});
 
 module.exports = routes;
