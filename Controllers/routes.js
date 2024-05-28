@@ -1,10 +1,10 @@
 /* Requirements */
 const express = require('express');
 const routes = express.Router();
-const jwt = require("jsonwebtoken");
 const SQL = require('../Controllers/sql');
 const bcrypt = require('bcrypt');
 const Users = require('../Controllers/users');
+var { isAuthorized } = require('./auth');
 
 /* Import das Funções */
 const Montagens = require('../Controllers/montagens');
@@ -26,11 +26,9 @@ routes.get('/users', async (req, res) => {
 
 // Ver um utilizador através do username
 routes.get('/users/:username', async (req, res) => {
-    const {username} = req.params;
+    const { username } = req.params;
     try {
         const gotUser = await Users.checkUser(username);
-        console.log(username)
-        console.log(gotUser)
         res.status(200).send(gotUser);
     } catch {
         res.status(400).send(`Não foi possivel encontrar o utilizador com o username: ${username}.`);
@@ -43,9 +41,9 @@ routes.post('/users', async (req, res) => {
     try {
         const existUser = await Users.checkUser(username);
 
-        if (existUser.length > 0)
+        if (existUser)
             return res.status(400).send(`Já existe um utilizador com o username: ${username}`);
-        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = { username: username, email: email, password: hashedPassword, phone: phone };
         const createdUser = await Users.createUser(newUser);
@@ -93,7 +91,7 @@ routes.delete('/users', async (req, res) => {
     try {
         const deletedUsers = Users.deleteUsers();
         res.status(200).send(deletedUsers);
-    } catch(err) {
+    } catch (err) {
         res.status(400).send(`Não foi possivel apagar os utilizadores. ${err.message}`);
     }
 })
@@ -104,20 +102,23 @@ routes.post('/login', async (req, res) => {
     var gotUser;
     try {
         gotUser = await Users.checkUser(username);
-    } catch {
-        res.status(500).send("Error! Something went wrong.");
+
+        if (gotUser) {
+            const cookie = await Users.loginUser(gotUser, password);
+            if (cookie) {
+                res.cookie('Authentication', cookie)
+                return res.status(200).send('Login feito com sucesso');
+            } else {
+                return res.status(404).send("Incorrect username or password.");
+            }
+        } else {
+            return res.status(404).send("Incorrect username or password.");
+        }
+
+    } catch (err) {
+        return res.status(500).send(`Error! Something went wrong. \n Error: ${err.message}`);
     }
 
-    if (gotUser) {
-        const loggedIn = users.loginUser(gotUser, password);
-        if (loggedIn) {
-            res.status(200).send('Login feito com sucesso');
-        } else {
-            res.status(400).send("Incorrect Password.");
-        }
-    } else {
-        res.status(404).send("Username not Found.");
-    }
 })
 
 
@@ -199,7 +200,7 @@ routes.delete('/drones', async (req, res) => {
     try {
         const deletedDrones = Drones.deleteDrones();
         res.status(200).send(deletedDrones);
-    } catch(err) {
+    } catch (err) {
         res.status(400).send(`Não foi possivel apagar os drones. ${err.message}`);
     }
 })
@@ -234,7 +235,7 @@ routes.post('/pecas', async (req, res) => {
 
         if (existPeca)
             return res.status(400).send(`Já existe uma peça com o nome: ${nomePeca}`);
-        
+
         const newPecaData = { nomePeca: nomePeca, quantidade: quantidade };
         const createdPeca = await Pecas.createPeca(newPecaData);
         return res.status(200).send(createdPeca);
@@ -251,7 +252,7 @@ routes.patch('/pecas', async (req, res) => {
         const oldPeca = await Pecas.checkPeca(oldNomePeca);
         if (!oldPeca)
             return res.status(404).send(`Não existe uma peça com nome ${oldNomePeca}`)
-        
+
         const newPecaData = { nomePeca: newNomePeca, quantidade: newQuantidade };
         const updatedPeca = await Pecas.updatePeca(oldPeca, newPecaData);
 
@@ -273,7 +274,7 @@ routes.delete('/pecas/:nomePeca', async (req, res) => {
 
 
         res.status(200).send(deletedPeca);
-    } catch(err) {
+    } catch (err) {
         res.status(400).send(`Não foi possível apagar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
     }
 })
@@ -283,7 +284,7 @@ routes.delete('/pecas', async (req, res) => {
     try {
         const deletedPecas = await Pecas.deletePecas();
         res.status(200).send(deletedPecas);
-    } catch(err) {
+    } catch (err) {
         res.status(400).send(`Não foi possível apagar as peças. ${err.message}`);
     }
 })
@@ -312,21 +313,21 @@ routes.get('/montagem', async (req, res) => {
     }
 });
 
-routes.put('/montagem', async (req, res) => {
-    const oldMontagem = { droneModel : req.body.oldDroneModel, workerName: req.body.oldWorkerName, startDate: req.body.startDate}
-    const newMontagem = { droneModel: req.body.droneModel, workerName: req.body.workerName, pecasUsadas: req.body.pecasUsadas}
+routes.put('/montagem', isAuthorized, async (req, res) => {
+    const oldMontagem = { droneModel: req.body.oldDroneModel, workerName: req.body.oldWorkerName, startDate: req.body.startDate }
+    const newMontagem = { droneModel: req.body.droneModel, workerName: req.body.workerName, pecasUsadas: req.body.pecasUsadas }
     try {
-        const updatedMontagem = await Montagens.updateMontagem(oldMontagem, newMontagem);
+        const updatedMontagem = await Montagens.updateMontagem(oldMontagem, newMontagem, req.user);
         res.status(200).json(updatedMontagem);
     } catch (err) {
-        res.status(400).send(`Erro ao atualizar a montagem: ${err.message}`);
+        res.status(err.status).send(`Erro ao atualizar a montagem: ${err.message}`);
     }
 });
 
-routes.post('/montagem', async (req, res) => {
+routes.post('/montagem', isAuthorized ,async (req, res) => {
     const newMontagemData = req.body;
     try {
-        const createdMontagem = await Montagens.createMontagem(newMontagemData);
+        const createdMontagem = await Montagens.createMontagem(newMontagemData, req.user);
         res.status(201).json(createdMontagem);
     } catch (err) {
         res.status(400).send(`Erro ao criar a montagem: ${err.message}`);

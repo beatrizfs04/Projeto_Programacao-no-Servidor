@@ -27,6 +27,10 @@ montagens.MontagensSchema = SQL.createSchema({
         required: true,
         maxlength: [50, 'Tamanho máximo é 50.']
     },
+    creatorId: { 
+        type: String, 
+        required: true,
+    },
     startDate: { 
         type: Date, 
         required: true
@@ -76,7 +80,7 @@ montagens.checkMontagem = async function(droneModel, workerName, startDate) {
 };
 
 // Update montagem
-montagens.updateMontagem = async function(oldMontagem, newMontagem) {
+montagens.updateMontagem = async function(oldMontagem, newMontagem, user) {
 
     // newMontagem.startDate = Date.now(); // Atualizar a start date ? Por ventura não
 
@@ -89,6 +93,15 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
         if (!existingMontagem) {
             throw new Error("Montagem não encontrada");
         }
+
+        if (existingMontagem['creatorId'] != user.id) {
+            const err = new Error('You can\' edit other builds!');
+            err.status = 401;
+            throw err;
+        }
+        
+
+
 
         // Calcular a diferença nas partes usadas
         const oldPartsUsage = existingMontagem.pecasUsadas.reduce((acc, peca) => {
@@ -151,9 +164,9 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem) {
 };
 
 // Criar montagem
-montagens.createMontagem = async function(newMontagemData) {
+montagens.createMontagem = async function(newMontagemData, user) {
     newMontagemData.startDate = Date.now(); // Data da montagem inicial de agora
-
+    newMontagemData.creatorId = user.id;
     // Verificar o estoque de cada peça a ser usada na montagem
     for (let i = 0; i < newMontagemData.pecasUsadas.length; i++) {
         const pecaUsada = newMontagemData.pecasUsadas[i];

@@ -1,4 +1,6 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 const users = express.Router();
 const SQL = require('../Controllers/sql');
 const validator = require('validator');
@@ -45,7 +47,7 @@ users.checkUsers = async function(){
 
 // Procura um utilizador na BD pelo seu username
 users.checkUser = async function(username){
-    const gotUser = await UsersDB.find({username});
+    const gotUser = await UsersDB.findOne({username});
     return gotUser;
 }
 
@@ -75,7 +77,7 @@ users.deleteUsers = async function(){
 }
 
 users.loginUser = async function(gotUser, gotPassword) {
-    const User = gotUser[0]
+    const User = gotUser
 
     const passwordMatch = await bcrypt.compare(gotPassword, User.password);
     if (passwordMatch) {
@@ -89,11 +91,10 @@ users.loginUser = async function(gotUser, gotPassword) {
                 "prgserver",
                 { expiresIn: "1h" }
             )
-            res.cookie('SessionToken', token);
-            return true;
+
+            return token;
         } catch (err) {
-            res.status(500).send(err.message);
-            return false;
+            throw err;
         }
     } else {
         return false;
