@@ -12,6 +12,8 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, '> Can\'t Connected Because of an Error.'));
 db.once('open', function callback() { console.log('> Connected Sucessfully to MongoDB.'); });
 
+mongoose.set('runValidators', true); // Validar no update tambem
+
 const SQL = {};
 
 /* Schema & Data */
