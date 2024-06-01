@@ -10,8 +10,6 @@ const Routes = require('./Controllers/routes');
 const Files = require('./Controllers/files');
 const Users = require('./Controllers/users');
 
-Users.checkUsers()
-
 /* Initialize */
 app.use(cookieParser());
 app.use(express.json());

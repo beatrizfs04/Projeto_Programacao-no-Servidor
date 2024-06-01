@@ -18,7 +18,7 @@ module.exports.isAuthorized = async function (req, res, next) {
             return next(error);
         }
 
-        const user = await Users.checkUser(decoded.username)
+        const user = await Users.getUserByUsername(decoded.username)
         
         if (!user) {
             const err = new Error('Not authorized! Go back!');

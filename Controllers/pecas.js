@@ -19,7 +19,7 @@ pecas.PecasSchema = SQL.createSchema({
 const PecasDB = SQL.useSchema(pecas.PecasSchema, "pecas");
 
 // Procura todos as peças na BD
-pecas.checkPecas = async function () {
+pecas.getAllPecas = async function () {
     try {
         const gotPecas = await PecasDB.find({});
         return gotPecas;
@@ -28,18 +28,18 @@ pecas.checkPecas = async function () {
     }
 }
 
-pecas.checkPeca = async function (nomePeca) {
+pecas.getPecaById = async function (pecaId) {
     try {
-        const gotPeca = await PecasDB.findOne({ nomePeca: nomePeca });
+        const gotPeca = await PecasDB.findOne({ _id: pecaId });
         return gotPeca;
     } catch (err) {
         throw err;
     }
 }
 
-pecas.updatePeca = async function (oldPeca, newPeca) {
+pecas.updatePecaById = async function (pecaId, newPeca) {
     try {
-        const updatedPeca = await PecasDB.findOneAndUpdate(oldPeca, newPeca, { new: true }); // New: true para retornar a peça atualizada, caso contrário retorna a antiga
+        const updatedPeca = await PecasDB.findOneAndUpdate({_id: pecaId}, newPeca, { new: true }); // New: true para retornar a peça atualizada, caso contrário retorna a antiga
         return updatedPeca;
     } catch (err) {
         throw err;
@@ -56,16 +56,16 @@ pecas.createPeca = async function (newPecaData) {
     }
 }
 
-pecas.deletePeca = async function (nomePeca) {
+pecas.deletePecaById = async function (pecaId) {
     try {
-        const deletedPeca = await PecasDB.findOneAndDelete({nomePeca: nomePeca});
+        const deletedPeca = await PecasDB.findOneAndDelete({_id: pecaId});
         return deletedPeca;
     } catch (err) {
         throw err;
     }
 }
 
-pecas.deletePecas = async function () {
+pecas.deleteAllPecas = async function () {
     try {
         const deletedPecas = await PecasDB.deleteMany({});
         return deletedPecas;

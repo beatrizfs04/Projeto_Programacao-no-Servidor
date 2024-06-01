@@ -27,18 +27,18 @@ drones.DronesSchema = SQL.createSchema({
 const DronesDB = SQL.useSchema(drones.DronesSchema, "drones");
 
 // Procura todos os drones na BD
-drones.checkDrones = async function(){
+drones.getAllDrones = async function(){
     const gotDrones = await DronesDB.find({});
     return gotDrones;
 }
 
-drones.checkDrone = async function(droneModel){
-    const gotDrone = await DronesDB.findOne({droneModelo: droneModel});
+drones.getDronebyId = async function(droneId){
+    const gotDrone = await DronesDB.findOne({_id: droneId});
     return gotDrone;
 }
 
-drones.updateDrone = async function(oldDrone, newDrone){
-    const updatedDrone = await DronesDB.findOneAndUpdate(oldDrone, newDrone, {new: true});
+drones.updateDrone = async function(droneId, newDroneData){
+    const updatedDrone = await DronesDB.findOneAndUpdate({_id: droneId}, newDroneData, {new: true});
     return updatedDrone;
 }
 
@@ -48,12 +48,13 @@ drones.createDrone = async function(newDroneData){
     return createdDrone;
 }
 
-drones.deleteDrone = async function(droneData){
-    const deleteDrone = await DronesDB.findOneAndDelete({droneModelo: droneData});
+drones.deleteDroneById = async function(droneId){
+    const deleteDrone = await DronesDB.findOneAndDelete({_id: droneId});
     return deleteDrone;
 }
 
-drones.deleteDrones = async function(){
+
+drones.deleteAllDrones = async function(){
     const deletedDrones = await DronesDB.deleteMany({});
     return deletedDrones;
 }

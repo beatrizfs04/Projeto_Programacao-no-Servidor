@@ -17,10 +17,14 @@ const Pecas = require('../Controllers/pecas');
 // Ver todos os utilizadores
 routes.get('/users', isAuthorized, async (req, res) => {
     try {
-        const gotUsers = await Users.checkUsers();
-        res.status(200).send(gotUsers);
-    } catch(err) {
-        res.status(400).send(`Não foi possivel aceder à informação da UsersDB. \nErro:${err.message}`);
+        const users = await Users.getAllUsers();
+        if (users) {
+            return res.status(200).send(users);
+        } else {
+            return res.status(204).send({ message: "No users in system" })
+        }
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Error: ${err.message}`);
     }
 })
 
@@ -28,10 +32,12 @@ routes.get('/users', isAuthorized, async (req, res) => {
 routes.get('/users/:username', isAuthorized, async (req, res) => {
     const { username } = req.params;
     try {
-        const gotUser = await Users.checkUser(username);
-        res.status(200).send(gotUser);
-    } catch {
-        res.status(400).send(`Não foi possivel encontrar o utilizador com o username: ${username}.`);
+        const user = await Users.getUserByUsername(username);
+
+        if (!user) return res.status(404).send({ message: `No user found with username of ${username}` });
+
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Error: ${err.message}.`);
     }
 })
 
@@ -39,10 +45,10 @@ routes.get('/users/:username', isAuthorized, async (req, res) => {
 routes.post('/users', async (req, res) => {
     const { username, email, password, phone } = req.body;
     try {
-        const existUser = await Users.checkUser(username);
+        const existUser = await Users.getUserByUsername(username);
 
         if (existUser)
-            return res.status(400).send(`Ups, Algo Correu Mal...`);
+            return res.status(404).send(`The username ${username} is already taken`);
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = { username: username, email: email, password: hashedPassword, phone: phone };
@@ -50,25 +56,40 @@ routes.post('/users', async (req, res) => {
         return res.status(200).send(createdUser);
 
     } catch (err) {
-        res.status(400).send(`${err.message}`);
+        res.status(err.status ?? 500).send(`Error: ${err.message}`);
     }
 })
 
 // Atualizar os dados de um utilizador
 routes.patch('/users', isAuthorized, async (req, res) => {
-    const { oldUsername, newUsername, newEmail, newPassword, newPhone } = req.body;
+    const { userId, userData } = req.body;
+    const { username, email, password, phone } = userData;
+
+
     try {
-        if(!oldUsername || !newUsername || !newEmail || !newPassword || !newPhone)
-            return res.status(400).send('Missing parameters');
+        if (!userId)
+            return res.status(400).send('Missing userId of user to update');
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const newUser = { username: newUsername, email: newEmail, password: hashedPassword, phone: newPhone };
-        const oldUser = await Users.checkUser(oldUsername);
-        const updateUser = await Users.updateUser(oldUser, newUser);
+        
+        const oldUserData = await Users.getUserById(userId);
+        if(!oldUserData) return res.status(404).send({message: `No user found with id of ${userId}`})
 
-        res.status(200).send(updateUser);
-    } catch(err) {
-        res.status(400).send(`Erro:${err.message}`);
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        
+        const updatedUserData = {
+            username: username ?? oldUserData.username,
+            email: email ?? oldUserData.email,
+            password: hashedPassword ?? oldUserData.password,
+            phone: phone ?? oldUserData.phone
+        };
+        
+        const updatedUser = await Users.updateUser(oldUserData, updatedUserData, {new: true});
+
+        res.status(200).send(updatedUser);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Error: ${err.message}`);
     }
 })
 
@@ -84,42 +105,58 @@ routes.delete('/users/:username', isAuthorized, async (req, res) => {
 
 
         res.status(200).send(deletedUser);
-    } catch {
-        res.status(400).send(`Não foi possivel apagar o utulizador com o username: ${username}.`);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Error: ${err.message}.`);
+    }
+})
+
+// Apagar um utilizador através do id
+routes.delete('/users/:userId', isAuthorized, async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const deletedUser = await Users.deleteUserById(userId);
+
+        if (!Boolean(deletedUser))
+            return res.status(404).send({ message: `No user found with id of ${userId}` })
+
+
+        return res.status(200).send(deletedUser);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Error: ${err.message}.`);
     }
 })
 
 // Apagar todos os utilizadores
 routes.delete('/users', isAuthorized, async (req, res) => {
     try {
-        const deletedUsers = Users.deleteUsers();
+        const deletedUsers = Users.deleteAllUsers();
         res.status(200).send(deletedUsers);
     } catch (err) {
-        res.status(400).send(`Não foi possivel apagar os utilizadores. ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 })
 
 // Login de Utilizadores
 routes.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    var gotUser;
     try {
-        gotUser = await Users.checkUser(username);
+        const user = await Users.getUserByUsername(username);
 
-        if (gotUser) {
-            const cookie = await Users.loginUser(gotUser, password);
+        if (user) {
+            const cookie = await Users.loginUser(username, password);
+            
             if (cookie) {
                 res.cookie('Authentication', cookie)
                 return res.status(200).send('Credenciais Aprovadas!');
             } else {
-                return res.status(404).send("Credenciais Incorretas.");
+                return res.status(401).send("Credenciais Incorretas.");
             }
         } else {
-            return res.status(404).send("Credenciais Incorretas.");
+            return res.status(401).send("Credenciais Incorretas.");
         }
 
     } catch (err) {
-        return res.status(500).send(`Error! Something went wrong. \n Error: ${err.message}`);
+        return res.status(err.status ?? 500).send(`Error: ${err.message}`);
     }
 
 })
@@ -130,21 +167,29 @@ routes.post('/login', async (req, res) => {
 // Ver todos os drones
 routes.get('/drones', isAuthorized, async (req, res) => {
     try {
-        const gotDrones = await Drones.checkDrones();
-        res.status(200).send(gotDrones);
+        const drones = await Drones.getAllDrones();
+        if (drones) {
+            return res.status(200).send(drones);
+        } else {
+            return res.status(204).send({ message: "Não há drones no sistema" })
+        }
     } catch {
-        res.status(400).send(`Não foi possivel aceder à informação da DronesDB.`);
+        res.status(err.status ?? 500).send(`Error: ${err.message}`);
     }
 })
 
 // Ver um drone através do modelo
 routes.get('/drones/:droneModelo', isAuthorized, async (req, res) => {
-    const { droneModelo } = req.params;
+    const { droneId } = req.params;
     try {
-        const gotDrone = await Drones.checkDrone(droneModelo);
-        res.status(200).send(gotDrone);
-    } catch {
-        res.status(400).send(`Não foi possivel encontrar o drone com o modelo: ${droneModelo}.`);
+        const drone = await Drones.getDroneById(droneId);
+        if (drone) {
+            return res.status(200).send(drone);
+        } else {
+            return res.status(404).send({ message: `No drone found with id of ${droneId}` })
+        }
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Error: ${err.message}`);
     }
 })
 
@@ -152,16 +197,13 @@ routes.get('/drones/:droneModelo', isAuthorized, async (req, res) => {
 routes.post('/drones', isAuthorized, async (req, res) => {
     const { droneModelo, pecasDrone } = req.body;
     try {
-        const existDrone = await Drones.checkDrone(droneModelo);
-        if (existDrone)
-            return res.status(400).send(`Já existe um drone com o modelo: ${droneModelo}`);
 
         const newDrone = { droneModelo: droneModelo, pecasDrone: pecasDrone };
         const createdDrone = await Drones.createDrone(newDrone);
         return res.status(200).send(createdDrone);
 
     } catch (err) {
-        res.status(400).send(`${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 })
 
@@ -175,34 +217,33 @@ routes.patch('/drones', isAuthorized, async (req, res) => {
 
         res.status(200).send(updatedDrone);
     } catch {
-        res.status(400).send(`Não foi possivel atualizar o drone com o modelo: ${oldDroneModelo}, para o novo modelo: ${newDroneModelo}.`);
+        res.status(err.status ?? 500).send(`Não foi possivel atualizar o drone com o modelo: ${oldDroneModelo}, para o novo modelo: ${newDroneModelo}.`);
     }
 })
 
-// Apagar um drone através do modelo
-routes.delete('/drones/:droneModelo', isAuthorized, async (req, res) => {
-    const { droneModelo } = req.params;
+// Apagar um drone através do id
+routes.delete('/drones/:droneId', isAuthorized, async (req, res) => {
+    const { droneId } = req.params;
     try {
-        const deletedDrone = await Drones.deleteDrone(droneModelo);
+        const deletedDrone = await Drones.deleteDroneById(droneId);
 
-        console.log(deletedDrone)
-        if (deletedDrone == null)
-            return res.status(404).end()
-
+        if (!Boolean(deletedDrone))
+            return res.status(404).send({ message: `No drone found with id of ${droneId}` })
 
         res.status(200).send(deletedDrone);
+
     } catch {
-        res.status(400).send(`Não foi possivel apagar o drone com o modelo: ${droneModelo}.`);
+        res.status(err.status ?? 500).send(`Não foi possivel apagar o drone com o modelo: ${droneModelo}.`);
     }
 })
 
 // Apagar todos os drones
 routes.delete('/drones', isAuthorized, async (req, res) => {
     try {
-        const deletedDrones = Drones.deleteDrones();
+        const deletedDrones = Drones.deleteAllDrones();
         res.status(200).send(deletedDrones);
     } catch (err) {
-        res.status(400).send(`Não foi possivel apagar os drones. ${err.message}`);
+        res.status(400).send(`Erro: ${err.message}`);
     }
 })
 
@@ -210,24 +251,28 @@ routes.delete('/drones', isAuthorized, async (req, res) => {
 //Ver todas as pecas
 routes.get('/pecas', isAuthorized, async (req, res) => {
     try {
-        const gotPecas = await Pecas.checkPecas();
-        res.status(200).send(gotPecas);
-    } catch {
-        res.status(400).send(`Não foi possível acessar informações da PecasDB. \n Erro: ${err.message}`);
+        const pecas = await Pecas.getAllPecas();
+        if (pecas) {
+            return res.status(200).send(pecas);
+        } else {
+            return res.status(204).send({ message: 'No pecas' })
+        }
+    } catch (err) {
+        res.status(500).send(`Erro: ${err.message}`);
     }
 })
 
 //ver uma peca através do nome
-routes.get('/pecas/:nomePeca', isAuthorized, async (req, res) => {
-    const { nomePeca } = req.params;
+routes.get('/pecas/:pecaId', isAuthorized, async (req, res) => {
+    const { pecaId } = req.params;
     try {
-        const gotPeca = await Pecas.checkPeca(nomePeca);
-        if(!gotPeca)
+        const peca = await Pecas.getPecaById(pecaId);
+        if (!gotPeca)
             return res.status(404).send("Nenhuma peça encontrada")
 
-        res.status(200).send(gotPeca);
+        res.status(200).send(peca);
     } catch {
-        res.status(400).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
+        res.status(err.status ?? 500).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
     }
 })
 
@@ -235,61 +280,60 @@ routes.get('/pecas/:nomePeca', isAuthorized, async (req, res) => {
 routes.post('/pecas', isAuthorized, async (req, res) => {
     const { nomePeca, quantidade } = req.body;
     try {
-        const existPeca = await Pecas.checkPeca(nomePeca);
-
-        if (existPeca)
-            return res.status(400).send(`Já existe uma peça com o nome: ${nomePeca}`);
-
         const newPecaData = { nomePeca: nomePeca, quantidade: quantidade };
         const createdPeca = await Pecas.createPeca(newPecaData);
-        return res.status(200).send(createdPeca);
+        return res.status(err.status ?? 500).send(createdPeca);
 
     } catch (err) {
-        res.status(400).send(`${err.message}`);
+        res.status(500).send(`Erro: ${err.message}`);
     }
 })
 
 //atualizar uma peca
 routes.patch('/pecas', isAuthorized, async (req, res) => {
-    const { oldNomePeca, newNomePeca, newQuantidade } = req.body;
+    const { pecaId, newPeca } = req.body;
     try {
-        const oldPeca = await Pecas.checkPeca(oldNomePeca);
+        const oldPeca = await Pecas.getPecaById(pecaId);
         if (!oldPeca)
-            return res.status(404).send(`Não existe uma peça com nome ${oldNomePeca}`)
+            return res.status(404).send(`Não existe uma peça com oid ${pecaId}`)
 
-        const newPecaData = { nomePeca: newNomePeca, quantidade: newQuantidade };
-        const updatedPeca = await Pecas.updatePeca(oldPeca, newPecaData);
+        const updatedPecaData = {
+            nomePeca:
+                newPeca.nomePeca ?? oldPeca.nomePeca,
+            quantidade: newPeca.quantidade ?? oldPeca.quantidade
+        };
+
+        const updatedPeca = await Pecas.updatePeca(oldPeca, updatedPecaData);
 
         res.status(200).send(updatedPeca);
     } catch (err) {
-        res.status(400).send(`Não foi possível atualizar a peça com o nome: ${oldNomePeca}.\n Erro: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 })
 
 //apagar uma peca pelo nome
-routes.delete('/pecas/:nomePeca', isAuthorized, async (req, res) => {
-    const { nomePeca } = req.params;
+routes.delete('/pecas/:pecaId', isAuthorized, async (req, res) => {
+    const { pecaId } = req.params;
     try {
-        const deletedPeca = await Pecas.deletePeca(nomePeca);
+        const deletedPeca = await Pecas.deletePecaById(pecaId);
 
-        console.log(deletedPeca)
-        if (deletedPeca == null)
+        if (!Boolean(deletedPeca))
             return res.status(404).send(`A peça ${nomePeca} não existe !`)
 
 
         res.status(200).send(deletedPeca);
     } catch (err) {
-        res.status(400).send(`Não foi possível apagar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 })
 
 //apagar todas as pecas
 routes.delete('/pecas', isAuthorized, async (req, res) => {
     try {
-        const deletedPecas = await Pecas.deletePecas();
+        const deletedPecas = await Pecas.deleteAllPecas();
         res.status(200).send(deletedPecas);
     } catch (err) {
-        res.status(400).send(`Não foi possível apagar as peças. ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 })
 
@@ -297,23 +341,23 @@ routes.delete('/pecas', isAuthorized, async (req, res) => {
 
 routes.get('/montagens', isAuthorized, async (req, res) => {
     try {
-        const montagensList = await Montagens.checkMontagens();
+        const montagensList = await Montagens.getAllMontagens();
         res.status(200).json(montagensList);
     } catch (err) {
-        res.status(400).send(`Erro ao procurar todas as montagens: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro ${err.message}`);
     }
 });
 
-routes.get('/montagem', isAuthorized, async (req, res) => {
-    const { droneModel, workerName, startDate } = req.body;
+routes.get('/montagem/:montagemId', isAuthorized, async (req, res) => {
+    const { montagemId } = req.params;
     try {
-        const montagem = await Montagens.checkMontagem(droneModel, workerName, startDate);
+        const montagem = await Montagens.getMontagemById(droneModel, workerName, startDate);
         if (!montagem) {
             return res.status(404).send('Montagem não encontrada');
         }
         res.status(200).json(montagem);
     } catch (err) {
-        res.status(400).send(`Erro ao procurar a montagem: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 });
 
@@ -324,7 +368,7 @@ routes.put('/montagem', isAuthorized, async (req, res) => {
         const updatedMontagem = await Montagens.updateMontagem(oldMontagem, newMontagem, req.user);
         res.status(200).json(updatedMontagem);
     } catch (err) {
-        res.status(err.status).send(`Erro ao atualizar a montagem: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 });
 
@@ -334,7 +378,7 @@ routes.post('/montagem', isAuthorized, async (req, res) => {
         const createdMontagem = await Montagens.createMontagem(newMontagemData, req.user);
         res.status(201).json(createdMontagem);
     } catch (err) {
-        res.status(400).send(`Erro ao criar a montagem: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro: ${err.message}`);
     }
 });
 
@@ -345,7 +389,7 @@ routes.delete('/montagem', isAuthorized, async (req, res) => {
         const deletedMontagem = await Montagens.deleteMontagem(montagemData);
         res.status(200).json(deletedMontagem);
     } catch (err) {
-        res.status(400).send(`Erro ao apagar a montagem: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro ao apagar a montagem: ${err.message}`);
     }
 });
 
@@ -354,7 +398,7 @@ routes.delete('/montagens', isAuthorized, async (req, res) => {
         const deletedMontagens = await Montagens.deleteMontagens();
         res.status(200).json(deletedMontagens);
     } catch (err) {
-        res.status(400).send(`Erro ao apagar todas as montagens: ${err.message}`);
+        res.status(err.status ?? 500).send(`Erro ao apagar todas as montagens: ${err.message}`);
     }
 });
 

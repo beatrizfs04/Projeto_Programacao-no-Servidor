@@ -60,7 +60,7 @@ montagens.MontagensSchema = SQL.createSchema({
 const MontagensDB = SQL.useSchema(montagens.MontagensSchema, "montagens");
 
 // Procura todos as peças na BD
-montagens.checkMontagens = async function() {
+montagens.getAllMontagens = async function() {
     try {
         const gotMontagens = await MontagensDB.find({});
         return gotMontagens;
@@ -70,17 +70,18 @@ montagens.checkMontagens = async function() {
 };
 
 // Verificar montagem individual
-montagens.checkMontagem = async function(droneModel, workerName, startDate) {
+montagens.getMontagemById = async function(montagemId) {
     try {
-        const gotMontagem = await MontagensDB.findOne({ droneModel, workerName, startDate });
-        return gotMontagem;
+        const montagem = await MontagensDB.findOne({ _id: montagemId });
+        if(montagem) return montagem;
+        return false;
     } catch (err) {
         throw new Error(`Erro ao procurar a montagem: ${err.message}`);
     }
 };
 
 // Update montagem
-montagens.updateMontagem = async function(oldMontagem, newMontagem, user) {
+montagens.updateMontagemById = async function(montagemId, newMontagem, user) {
 
     // newMontagem.startDate = Date.now(); // Atualizar a start date ? Por ventura não
 
@@ -89,7 +90,7 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem, user) {
     
     try {
         // Obter dados da montagem antiga
-        const existingMontagem = await MontagensDB.findOne(oldMontagem).session(session);
+        const existingMontagem = await MontagensDB.findOne({_id: montagemId}).session(session);
         if (!existingMontagem) {
             throw new Error("Montagem não encontrada");
         }
@@ -150,7 +151,7 @@ montagens.updateMontagem = async function(oldMontagem, newMontagem, user) {
         }
 
         // Atualizar a montagem
-        const updatedMontagem = await MontagensDB.findOneAndUpdate(oldMontagem, newMontagem, { new: true, session });
+        const updatedMontagem = await MontagensDB.findOneAndUpdate({_id: montagemId}, newMontagem, { new: true, session });
 
         await session.commitTransaction();
         session.endSession();
@@ -208,9 +209,9 @@ montagens.createMontagem = async function(newMontagemData, user) {
 };
 
 // Apagar montagem
-montagens.deleteMontagem = async function(montagemData) {
+montagens.deleteMontagemById = async function(montagemId) {
     try {
-        const deletedMontagem = await MontagensDB.findOneAndDelete(montagemData);
+        const deletedMontagem = await MontagensDB.findOneAndDelete({_id: montagemId});
         if (!deletedMontagem) {
             throw new Error("Montagem não encontrada");
         }
@@ -221,7 +222,7 @@ montagens.deleteMontagem = async function(montagemData) {
 };
 
 //Apagar todas montagens
-montagens.deleteMontagens = async function(){
+montagens.deleteAllMontagens = async function(){
     const deletedMontagens = await MontagensDB.deleteMany({});
     return deletedMontagens;
 };
