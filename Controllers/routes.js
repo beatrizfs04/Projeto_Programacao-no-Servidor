@@ -441,4 +441,23 @@ routes.get('/estatisticas/PecaMenosUtilizada', isAuthorized, async (req, res) =>
     }
 });
 
+routes.get('/estatisticas/topUsers', isAuthorized, async (req, res) => {
+    try {
+        const topUsers = await Montagens.getUserMaisProduziu();
+        res.status(200).send(topUsers);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar os users que mais produziram drones: ${err.message}`);
+    }
+});
+
+routes.get('/estatisticas/bottomUsers', isAuthorized, async (req, res) => {
+    try {
+        const bottomUsers = await Montagens.getUserMenosProduziu();
+        res.status(200).send(bottomUsers);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar os users que menos produziram drones: ${err.message}`);
+    }
+});
+
+
 module.exports = routes;

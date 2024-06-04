@@ -337,5 +337,46 @@ montagens.getPecaMenosUtilizada = async function() {
     }
 };
 
+//---------------------Drones---------------
+//----ver o user que mais montou drones 
+montagens.getUserMaisProduziu = async function(){
+    try{
+        const userProducao = [
+            { $group: {_id: "$creatorId", totalProduzido: {$sum: 1}
+            }
+        },
+        {
+            $sort: {$totalDrones: -1}
+        },
+    ];
+    const topUser = await MontagensDB.aggregate(userProducao);
+    return topUsers; 
+    }
+    catch (err){
+        throw new Error(`Erro ao procurar user que mais produziram drones: ${err.message}`);
+    }
+}
+
+montagens.getUserMenosProduziu = async function(limit = 10) {
+    try {
+        const userProducao = [
+            {
+                $group: {
+                    _id: "$creatorId",
+                    totalDrones: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { totalDrones: 1 }
+            }
+        ];
+
+        const bottomUsers = await MontagensDB.aggregate(userProducao);
+        return bottomUsers;
+    } catch (err) {
+        throw new Error(`Erro ao procurar users que menos produziram drones: ${err.message}`);
+    }
+};
+    
 
 module.exports = montagens;
