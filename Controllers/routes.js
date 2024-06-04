@@ -361,11 +361,11 @@ routes.get('/montagem/:montagemId', isAuthorized, async (req, res) => {
     }
 });
 
-routes.put('/montagem', isAuthorized, async (req, res) => {
-    const oldMontagem = { droneModel: req.body.oldDroneModel, workerName: req.body.oldWorkerName, startDate: req.body.startDate }
-    const newMontagem = { droneModel: req.body.droneModel, workerName: req.body.workerName, pecasUsadas: req.body.pecasUsadas }
+routes.put('/montagem/:montagemId', isAuthorized, async (req, res) => {
+    const { montagemId } = req.params;
+    const newMontagem = { droneModel: req.body.droneModel, workerName: req.body.workerName, finished: (req.body.finished ? req.body.finished : false), pecasUsadas: req.body.pecasUsadas }
     try {
-        const updatedMontagem = await Montagens.updateMontagem(oldMontagem, newMontagem, req.user);
+        const updatedMontagem = await Montagens.updateMontagemById(montagemId, newMontagem, req.user);
         res.status(200).json(updatedMontagem);
     } catch (err) {
         res.status(err.status ?? 500).send(`Erro: ${err.message}`);
@@ -399,6 +399,18 @@ routes.delete('/montagens', isAuthorized, async (req, res) => {
         res.status(200).json(deletedMontagens);
     } catch (err) {
         res.status(err.status ?? 500).send(`Erro ao apagar todas as montagens: ${err.message}`);
+    }
+});
+
+// ----------------------- Estatisticas ----------------------- //
+
+routes.get('/estatisticas/tempoMontagem/:IdMontagem', isAuthorized, async (req, res) => {
+    const { IdMontagem } = req.params;
+    try {
+        const timeMontagem = await Montagens.getTempoMontagem(IdMontagem);
+        res.status(200).send(timeMontagem);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao obter o tempo de montagem: ${err.message}`);
     }
 });
 

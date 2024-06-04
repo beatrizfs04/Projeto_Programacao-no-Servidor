@@ -150,6 +150,22 @@ montagens.updateMontagemById = async function(montagemId, newMontagem, user) {
             }
         }
 
+        if (newMontagem.finished) {
+            const finishDate = Date.now();
+            newMontagem = {
+                droneModel: newMontagem.droneModel, 
+                workerName: newMontagem.workerName,
+                endDate: finishDate,
+                pecasUsadas: newMontagem.pecasUsadas
+            }
+        } else {
+            newMontagem = {
+                droneModel: newMontagem.droneModel, 
+                workerName: newMontagem.workerName, 
+                pecasUsadas: newMontagem.pecasUsadas
+            }
+        }
+
         // Atualizar a montagem
         const updatedMontagem = await MontagensDB.findOneAndUpdate({_id: montagemId}, newMontagem, { new: true, session });
 
@@ -226,5 +242,18 @@ montagens.deleteAllMontagens = async function(){
     const deletedMontagens = await MontagensDB.deleteMany({});
     return deletedMontagens;
 };
+
+montagens.getTempoMontagem = async function(montagemId) {
+    const gotMontagem = await MontagensDB.findOne({_id: montagemId});
+    if (!gotMontagem.endDate) { throw new Error(`A Montagem Com o ID ${montagemId} Não Foi Concluída.`)}
+    console.log((gotMontagem.endDate.getTime() - gotMontagem.startDate.getTime())/(1000 * 3600 * 24));
+    const TimeInDays = Math.round((gotMontagem.endDate.getTime() - gotMontagem.startDate.getTime())/(1000 * 3600 * 24));
+    if (TimeInDays > 1) {
+        return (`O Tempo de Montagem Foi de: ${TimeInDays} Dias<br/>Com o ID: ${montagemId}<br/>Para o Modelo: ${gotMontagem.droneModel}`);
+    } else {
+        const TimeInHours = Math.round((gotMontagem.endDate.getTime() - gotMontagem.startDate.getTime())/(1000 * 3600));
+        return (`O Tempo de Montagem Foi de: ${TimeInHours} Horas<br/>Com o ID: ${montagemId}<br/>Para o Modelo: ${gotMontagem.droneModel}`);
+    }
+}
 
 module.exports = montagens;
