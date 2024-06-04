@@ -459,5 +459,23 @@ routes.get('/estatisticas/bottomUsers', isAuthorized, async (req, res) => {
     }
 });
 
+routes.get('/estatisticas/workerMontagens/:workerName', isAuthorized, async (req, res) => {
+    const { workerName } = req.params;
+    try {
+        const montagensWorker = await Montagens.getMontagensTrabalhador(workerName);
+        res.status(200).send(montagensWorker);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar os users que menos produziram drones: ${err.message}`);
+    }
+});
+
+routes.get('/estatisticas/workersMontagens/', isAuthorized, async (req, res) => {
+    try {
+        const montagensWorkers = await Montagens.getMontagensTrabalhadores();
+        res.status(200).send(montagensWorkers);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar os users que menos produziram drones: ${err.message}`);
+    }
+});
 
 module.exports = routes;

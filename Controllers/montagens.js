@@ -364,6 +364,40 @@ montagens.getUserMenosProduziu = async function(limit = 10) {
         throw new Error(`Erro ao procurar users que menos produziram drones: ${err.message}`);
     }
 };
-    
+
+montagens.getMontagensTrabalhador = async function(workerName){
+    try{
+        const workerMontagens = await MontagensDB.find({workerName: workerName});
+        return (`O Trabalhador ${workerName} Fez ao Todo ${workerMontagens.length} Montagens!`); 
+    }catch (err){
+        throw new Error(`Erro ao procurar montagens feitas pelo trabalhador: ${err.message}`);
+    }
+}
+
+montagens.getMontagensTrabalhadores = async function(){
+    try{
+        const workersMontagens = await MontagensDB.find({});
+        var montagensCount = {};
+
+        for (let i = 0; i < workersMontagens.length; i++) {
+            const workerName = workersMontagens[i].workerName;
+
+            if (!montagensCount[workerName]) {
+                montagensCount[workerName] = 1;
+            } else {
+                montagensCount[workerName]++;
+            }
+        }
+        var montagensText = "";
+        for (let workerName in montagensCount) {
+            if (montagensCount.hasOwnProperty(workerName)) {
+                montagensText += `O Trabalhador ${workerName} Fez ao Todo ${montagensCount[workerName]} Montagens<br />`;
+            }
+        }
+        return montagensText;
+    }catch (err){
+        throw new Error(`Erro ao procurar montagens feitas pelo trabalhador: ${err.message}`);
+    }
+}
 
 module.exports = montagens;
