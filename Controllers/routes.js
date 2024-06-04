@@ -414,4 +414,31 @@ routes.get('/estatisticas/tempoMontagem/:IdMontagem', isAuthorized, async (req, 
     }
 });
 
+routes.get('/estatisticas/PecasUtilizacao', isAuthorized, async (req, res) => {
+    try {
+        const listaPecas = await Montagens.getPecasUtilizacao();
+        res.status(200).send(listaPecas);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar a vezes que as peças foram usadas: ${err.message}`);
+    }
+});
+
+routes.get('/estatisticas/PecaMaisUtilizada', isAuthorized, async (req, res) => {
+    try {
+        const pecaMaisUtilizada = await Montagens.getPecaMaisUtilizada();
+        res.status(200).send(pecaMaisUtilizada);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar a peça mais usada: ${err.message}`);
+    }
+});
+
+routes.get('/estatisticas/PecaMenosUtilizada', isAuthorized, async (req, res) => {
+    try {
+        const PecaMenosUtilizada = await Montagens.getPecaMenosUtilizada();
+        res.status(200).send(PecaMenosUtilizada);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Erro ao procurar a peça menos usada: ${err.message}`);
+    }
+});
+
 module.exports = routes;

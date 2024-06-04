@@ -44,7 +44,7 @@ montagens.MontagensSchema = SQL.createSchema({
             required: true,
             validate: {
                 validator: function(v) {
-                    return PecasDB.findOne({ nomePeca: v }).then(peca => Boolean(peca)); // verifica ao criar uma montagem se a peca realmente existe, se sim permite fazer uma montagem
+                    return PecasDB.findOne({ nomePeca: v }).then(peca => Boolean(peca));
                 },
                 message: props => `Peça ${props.value} não existe!`
             }
@@ -254,5 +254,88 @@ montagens.getTempoMontagem = async function(montagemId) {
         return (`O Tempo de Montagem Foi de: ${TimeInHours} Horas<br/>Com o ID: ${montagemId}<br/>Para o Modelo: ${gotMontagem.droneModel}`);
     }
 }
+
+
+montagens.getPecasUtilizacao = async function() {
+    try {
+        const gotMontagens = await MontagensDB.find({});
+        const listaPecas = {};
+        gotMontagens.forEach(montagem => {
+            montagem.pecasUsadas.forEach(pecaUsada => {
+                if (listaPecas[pecaUsada.nomePeca]) {
+                    listaPecas[pecaUsada.nomePeca] += pecaUsada.quantidade;
+                } else {
+                    listaPecas[pecaUsada.nomePeca] = pecaUsada.quantidade;
+                }
+            });
+        });
+
+        return listaPecas;
+    } catch (err) {
+        throw new Error(`Erro ao procurar peças usadas: ${err.message}`);
+    }
+};
+
+montagens.getPecaMaisUtilizada = async function() {
+    try {
+        const gotMontagens = await MontagensDB.find({});
+        var pecaMaisUtilizada = {};
+        const listaPecas = {};
+        gotMontagens.forEach(montagem => {
+            montagem.pecasUsadas.forEach(pecaUsada => {
+                if (listaPecas[pecaUsada.nomePeca]) {
+                    listaPecas[pecaUsada.nomePeca] += pecaUsada.quantidade;
+                } else {
+                    listaPecas[pecaUsada.nomePeca] = pecaUsada.quantidade;
+                }
+            });
+        });
+
+        for (const peca in listaPecas) {
+            if (pecaMaisUtilizada.quantidade < listaPecas[peca]) {
+                pecaMaisUtilizada = { nome: peca, quantidade: listaPecas[peca] };
+            } else if (Object.keys(pecaMaisUtilizada).length === 0) {
+                pecaMaisUtilizada = { nome: peca, quantidade: listaPecas[peca] };
+            }
+        }
+        
+        
+        return pecaMaisUtilizada;
+    } catch (err) {
+        throw new Error(`${err.message}`);
+    }
+};
+
+
+montagens.getPecaMenosUtilizada = async function() {
+    try {
+        const gotMontagens = await MontagensDB.find({});
+        var pecaMenosUtilizada = {};
+        const listaPecas = {};
+        gotMontagens.forEach(montagem => {
+            montagem.pecasUsadas.forEach(pecaUsada => {
+                if (listaPecas[pecaUsada.nomePeca]) {
+                    listaPecas[pecaUsada.nomePeca] += pecaUsada.quantidade;
+                } else {
+                    listaPecas[pecaUsada.nomePeca] = pecaUsada.quantidade;
+                }
+            });
+        });
+
+        for (const peca in listaPecas) {
+            if (pecaMenosUtilizada.quantidade > listaPecas[peca]) {
+                pecaMenosUtilizada = { nome: peca, quantidade: listaPecas[peca] };
+            } else if (Object.keys(pecaMenosUtilizada).length === 0) {
+                pecaMenosUtilizada = { nome: peca, quantidade: listaPecas[peca] };
+            }
+        }
+        
+        
+        return pecaMenosUtilizada;
+    } catch (err) {
+        throw new Error(`${err.message}`);
+    }
+};
+
 
 module.exports = montagens;
