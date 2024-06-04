@@ -246,7 +246,6 @@ montagens.deleteAllMontagens = async function(){
 montagens.getTempoMontagem = async function(montagemId) {
     const gotMontagem = await MontagensDB.findOne({_id: montagemId});
     if (!gotMontagem.endDate) { throw new Error(`A Montagem Com o ID ${montagemId} Não Foi Concluída.`)}
-    console.log((gotMontagem.endDate.getTime() - gotMontagem.startDate.getTime())/(1000 * 3600 * 24));
     const TimeInDays = Math.round((gotMontagem.endDate.getTime() - gotMontagem.startDate.getTime())/(1000 * 3600 * 24));
     if (TimeInDays > 1) {
         return (`O Tempo de Montagem Foi de: ${TimeInDays} Dias<br/>Com o ID: ${montagemId}<br/>Para o Modelo: ${gotMontagem.droneModel}`);
