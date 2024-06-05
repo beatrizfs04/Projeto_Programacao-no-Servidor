@@ -342,10 +342,10 @@ montagens.getPecaMenosUtilizada = async function() {
 montagens.getUserMaisProduziu = async function(){
     try{
         const userProducao = [
-            { $group: {_id: "$creatorId", totalProduzido: {$sum: 1}}},
-        {$sort: {$totalDrones: -1}},
+            {$group: {_id: "$creatorId", totalDrones: { $sum: 1 }}},
+            {$sort: { totalDrones: -1 }}
     ];
-    const topUser = await MontagensDB.aggregate(userProducao);
+    const topUsers = await MontagensDB.aggregate(userProducao);
     return topUsers; 
     }catch (err){
         throw new Error(`Erro ao procurar user que mais produziram drones: ${err.message}`);
