@@ -346,7 +346,7 @@ montagens.getUserMaisProduziu = async function(){
             {$sort: { totalDrones: -1 }}
     ];
     const topUsers = await MontagensDB.aggregate(userProducao);
-    return topUsers; 
+    return topUsers[0]; 
     }catch (err){
         throw new Error(`Erro ao procurar user que mais produziram drones: ${err.message}`);
     }
@@ -359,7 +359,7 @@ montagens.getUserMenosProduziu = async function(limit = 10) {
             {$sort: { totalDrones: 1 }}
         ];
         const bottomUsers = await MontagensDB.aggregate(userProducao);
-        return bottomUsers;
+        return bottomUsers[0];
     } catch (err) {
         throw new Error(`Erro ao procurar users que menos produziram drones: ${err.message}`);
     }
