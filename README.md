@@ -1,3 +1,9 @@
+## Constituição do Grupo
+- Beatriz Santos » Nº50473
+- Eduardo Abrantes » Nº50391
+- Manoela Azevedo » Nº50034
+- Rodrigo Paiva » Nº49442
+
 ## Projeto de Gestão de Montagem de Drones
 
 - Desenvolver uma aplicação web para gerir o processo de montagem de drones. A aplicação deve permitir aos utilizadores registar-se, autenticar-se e criar, visualizar, atualizar e eliminar informações relacionadas com a montagem de drones. Os endpoints da API devem ser implementados de acordo com as melhores práticas RESTful. Os endpoints deverão ser documentados em OpenAPI.
