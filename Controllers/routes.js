@@ -266,13 +266,13 @@ routes.get('/pecas', isAuthorized, async (req, res) => {
 routes.get('/pecas/:pecaId', isAuthorized, async (req, res) => {
     const { pecaId } = req.params;
     try {
-        const peca = await Pecas.getPecaById(pecaId);
+        const gotPeca = await Pecas.getPecaById(pecaId);
         if (!gotPeca)
             return res.status(404).send("Nenhuma peça encontrada")
 
-        res.status(200).send(peca);
-    } catch {
-        res.status(err.status ?? 500).send(`Não foi possível encontrar a peça com o nome: ${nomePeca}.\n Erro: ${err.message}`);
+        res.status(200).send(gotPeca);
+    } catch (err) {
+        res.status(err.status ?? 500).send(`Não foi possível encontrar a peça com o ID: ${pecaId}.\n Erro: ${err.message}`);
     }
 })
 
@@ -303,7 +303,7 @@ routes.patch('/pecas', isAuthorized, async (req, res) => {
             quantidade: newPeca.quantidade ?? oldPeca.quantidade
         };
 
-        const updatedPeca = await Pecas.updatePeca(oldPeca, updatedPecaData);
+        const updatedPeca = await Pecas.updatePecaById(oldPeca, updatedPecaData);
 
         res.status(200).send(updatedPeca);
     } catch (err) {
@@ -386,7 +386,7 @@ routes.post('/montagem', isAuthorized, async (req, res) => {
 routes.delete('/montagem', isAuthorized, async (req, res) => {
     const montagemData = req.body;
     try {
-        const deletedMontagem = await Montagens.deleteMontagem(montagemData);
+        const deletedMontagem = await Montagens.deleteMontagemById(montagemData);
         res.status(200).json(deletedMontagem);
     } catch (err) {
         res.status(err.status ?? 500).send(`Erro ao apagar a montagem: ${err.message}`);
@@ -395,7 +395,7 @@ routes.delete('/montagem', isAuthorized, async (req, res) => {
 
 routes.delete('/montagens', isAuthorized, async (req, res) => {
     try {
-        const deletedMontagens = await Montagens.deleteMontagens();
+        const deletedMontagens = await Montagens.deleteAllMontagens();
         res.status(200).json(deletedMontagens);
     } catch (err) {
         res.status(err.status ?? 500).send(`Erro ao apagar todas as montagens: ${err.message}`);
