@@ -282,10 +282,9 @@ routes.post('/pecas', isAuthorized, async (req, res) => {
     try {
         const newPecaData = { nomePeca: nomePeca, quantidade: quantidade };
         const createdPeca = await Pecas.createPeca(newPecaData);
-        return res.status(err.status ?? 500).send(createdPeca);
-
+        res.status(200).send(createdPeca);
     } catch (err) {
-        res.status(500).send(`Erro: ${err.message}`);
+        return res.status(err.status ?? 500);
     }
 })
 
