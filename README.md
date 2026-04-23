@@ -22,10 +22,10 @@ Neste projeto o objetivo foi desenvolver uma aplicação web para gerir o proces
 ## Quem participou?
 Este projeto foi realizado por 4 alunos da Lincenciatura de Informática Web, Móvel e na Nuvem.
 
-- Beatriz Santos | Nº 50473
-- Eduardo Abrantes | Nº 50391
-- Manoela Azevedo | Nº 50034
-- Rodrigo Paiva | Nº 49442
+- Beatriz Santos 
+- Eduardo Abrantes 
+- Manoela Azevedo
+- Rodrigo Paiva 
 
 ## Que linguagens de programação foram utilizadas?
 
